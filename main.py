@@ -22,8 +22,6 @@ def display():
     gl.glClear(gl.GL_COLOR_BUFFER_BIT)
 
     gl.glBindVertexArray(vao)
-    gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vbo)
-    gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, ebo)
     offset = ctypes.c_void_p(0)
     gl.glDrawElements(gl.GL_TRIANGLES, 6, gl.GL_UNSIGNED_INT, offset)  # type: ignore
 
@@ -107,11 +105,10 @@ vao = None
 vbo = None
 ebo = None
 
+
 def setupModels():
     global vbo
     vbo = gl.glGenBuffers(1)  # type: ignore
-
-    # upload data
     data = np.zeros((4, 2), dtype=np.float32)
     data[...] = (-0.5, 0.5), (0.5, 0.5), (0.5, -0.5), (-0.5, -0.5)
     gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vbo)
@@ -127,21 +124,25 @@ def setupModels():
     loc = gl.glGetAttribLocation(program, "position")
 
     gl.glBindVertexArray(vao)
-    gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vbo)
-    gl.glEnableVertexAttribArray(loc)
-    gl.glVertexAttribPointer(loc, 2, gl.GL_FLOAT, False, stride, offset)
-    gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0)
-    gl.glBindVertexArray(0)
 
+    # attach ebo to vao
     global ebo
-    ebo = gl.glGenBuffers(1) # type: ignore
+    ebo = gl.glGenBuffers(1)  # type: ignore
     data = np.zeros((2, 3), dtype=np.uint32)
     data[...] = (0, 1, 2), (0, 2, 3)
     gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, ebo)
-    gl.glBufferData(gl.GL_ELEMENT_ARRAY_BUFFER, data.nbytes, data, gl.GL_DYNAMIC_DRAW)
-    gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, 0)
+    gl.glBufferData(
+        gl.GL_ELEMENT_ARRAY_BUFFER, data.nbytes, data, gl.GL_DYNAMIC_DRAW
+    )
 
+    gl.glEnableVertexAttribArray(loc)
 
+    # attach vbo to attrib
+    gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vbo)
+    gl.glVertexAttribPointer(loc, 2, gl.GL_FLOAT, False, stride, offset)
+    gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0)
+
+    gl.glBindVertexArray(0)
 
 
 def loadCt():
