@@ -23,7 +23,9 @@ def display():
 
     gl.glBindVertexArray(vao)
     gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vbo)
-    gl.glDrawArrays(gl.GL_TRIANGLE_STRIP, 0, 4)
+    gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, ebo)
+    offset = ctypes.c_void_p(0)
+    gl.glDrawElements(gl.GL_TRIANGLES, 6, gl.GL_UNSIGNED_INT, offset)  # type: ignore
 
     # mat_proj = glm.perspective(45, WIN_ASPECT, 0.01, 1000.0)
     glut.glutSwapBuffers()
@@ -103,7 +105,7 @@ def setupShaders():
 
 vao = None
 vbo = None
-
+ebo = None
 
 def setupModels():
     global vbo
@@ -111,7 +113,7 @@ def setupModels():
 
     # upload data
     data = np.zeros((4, 2), dtype=np.float32)
-    data[...] = (-0.5, 0.5), (0.5, 0.5), (-0.5, -0.5), (0.5, -0.5)
+    data[...] = (-0.5, 0.5), (0.5, 0.5), (0.5, -0.5), (-0.5, -0.5)
     gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vbo)
     gl.glBufferData(gl.GL_ARRAY_BUFFER, data.nbytes, data, gl.GL_DYNAMIC_DRAW)
     gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0)
@@ -130,6 +132,16 @@ def setupModels():
     gl.glVertexAttribPointer(loc, 2, gl.GL_FLOAT, False, stride, offset)
     gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0)
     gl.glBindVertexArray(0)
+
+    global ebo
+    ebo = gl.glGenBuffers(1) # type: ignore
+    data = np.zeros((2, 3), dtype=np.uint32)
+    data[...] = (0, 1, 2), (0, 2, 3)
+    gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, ebo)
+    gl.glBufferData(gl.GL_ELEMENT_ARRAY_BUFFER, data.nbytes, data, gl.GL_DYNAMIC_DRAW)
+    gl.glBindBuffer(gl.GL_ELEMENT_ARRAY_BUFFER, 0)
+
+
 
 
 def loadCt():
