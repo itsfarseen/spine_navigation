@@ -1,4 +1,3 @@
-# vi: foldmethod=indent:
 import OpenGL.GL as gl
 import OpenGL.GLUT as glut
 import nibabel as nib
@@ -10,6 +9,7 @@ from voxels import sphere
 import pywavefront
 from shader import Shader
 from window import Window
+
 
 def setup():
     gl.glViewport(0, 0, window.width(), window.height())
@@ -25,9 +25,9 @@ def display():
 
     glut.glutSwapBuffers()
 
+
 shader = Shader()
 window = Window(display)
-
 
 
 def main():
@@ -36,7 +36,6 @@ def main():
 
     setup()
     window.run()
-
 
 
 if __name__ == "__main__":
