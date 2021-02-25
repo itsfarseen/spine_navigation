@@ -9,6 +9,7 @@ from voxels import sphere
 import pywavefront
 from shader import Shader
 from window import Window
+from cube import CubeMesh
 
 
 def setup():
@@ -22,17 +23,20 @@ def display():
     gl.glClear(gl.GL_COLOR_BUFFER_BIT)
 
     shader.use()
+    cube.draw()
 
     glut.glutSwapBuffers()
 
 
 shader = Shader()
+cube = CubeMesh()
 window = Window(display)
 
 
 def main():
     window.setup()
     shader.setup()
+    cube.setup(shader)
 
     setup()
     window.run()

@@ -52,6 +52,9 @@ class Shader:
         self.program = program
         self.compiled = True
 
+    def getAttribLocation(self, attrib):
+        return gl.glGetAttribLocation(self.program, attrib)
+
     def use(self):
         assert (
             self.compiled
