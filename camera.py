@@ -9,23 +9,49 @@ class Camera:
         self.position = glm.vec3(0.0, 5.0, 5.0)
         self.lookAt = glm.vec3(0.0, 0.0, 0.0)
 
+        self._vecCache = {}
+
     def setup(self, shader, window):
         self.window = window
         self.cameraUniform = shader.getUniformLocation("camera")
 
+    def _fixTooSmall(self, name, val):
+        # todo: this workaround is not working
+        # because we are not letting the vector advance, we are just clamping it
+        if glm.length(val) < 0.1:
+            if name in self._vecCache:
+                return self._vecCache[name]
+            else:
+                return val
+        else:
+            self._vecCache[name] = val
+            return val
+
     def _getCamVecs(self):
         worldUp = glm.vec3(0.0, 1.0, 0.0)
 
-        cameraPrincipal = glm.normalize(self.lookAt - self.position)
-        cameraRight = glm.normalize(glm.cross(cameraPrincipal, worldUp))
-        cameraUp = glm.normalize(glm.cross(cameraRight, cameraPrincipal))
+        cameraPrincipal = self._fixTooSmall(
+            "principal", self.lookAt - self.position
+        )
+        cameraPrincipal = glm.normalize(cameraPrincipal)
+
+        cameraRight = self._fixTooSmall(
+            "right", glm.cross(cameraPrincipal, worldUp)
+        )
+        cameraRight = glm.normalize(cameraRight)
+
+        cameraUp = self._fixTooSmall(
+            "up", glm.cross(cameraRight, cameraPrincipal)
+        )
+        cameraUp = glm.normalize(cameraUp)
+
         return (cameraPrincipal, cameraRight, cameraUp)
 
     def update(self):
         (cameraPrincipal, cameraRight, cameraUp) = self._getCamVecs()
 
         view = glm.lookAt(
-            self.position, self.position + cameraPrincipal, glm.vec3(0, 1, 0)
+            self.position, self.position + cameraPrincipal, cameraUp
         )
         proj = glm.perspective(
             glm.radians(45.0), self.window.aspect(), 0.1, 100.0
@@ -49,7 +75,7 @@ class Camera:
         y_angle = glm.radians(y * y_factor)
         rot_y = glm.rotate(glm.identity(glm.mat4), y_angle, y_rot_axis)
 
-        rot = rot_y * rot_x
+        rot = rot_x * rot_y
         posDir = glm.vec4(self.position - self.lookAt, 0.0)
         posDirRotated = rot * posDir
         self.position = self.lookAt + glm.vec3(posDirRotated)
