@@ -10,6 +10,8 @@ from simple_shader import SimpleShader
 from window import Window
 from cube import CubeMesh
 from camera import Camera
+from grid_shader import GridShader
+from grid import GridMesh
 import logging
 import glfw
 
@@ -26,6 +28,7 @@ def display():
     gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)  # type: ignore
 
     cube.draw()
+    grid.draw()
 
 
 last_x = None
@@ -65,16 +68,22 @@ def mouse(btn, action, mods, warp, x, y):
     last_y = y
 
 
-shader = SimpleShader()
-cube = CubeMesh(shader)
+cube_shader = SimpleShader()
+cube = CubeMesh(cube_shader)
+
+grid_shader = GridShader()
+grid = GridMesh(grid_shader)
+
 window = Window(display, mousefn=mouse)
-camera = Camera(window, shader)
+camera = Camera(window, [cube_shader, grid_shader])
 
 
 def main():
     window.setup()
-    shader.setup()
+    cube_shader.setup()
     cube.setup()
+    grid_shader.setup()
+    grid.setup()
     camera.setup()
 
     setup()

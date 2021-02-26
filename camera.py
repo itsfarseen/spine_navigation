@@ -57,7 +57,12 @@ class Camera:
             glm.radians(45.0), self.window.aspect(), 0.1, 100.0
         )
         cameraMatrix = proj * view
-        self.shader.setCameraMatrix(cameraMatrix)
+
+        if isinstance(self.shader, list):
+            for shader in self.shader:
+                shader.setCameraMatrix(cameraMatrix)
+        else:
+            self.shader.setCameraMatrix(cameraMatrix)
 
     def rotate(self, x, y):
         x_factor = 90.0
