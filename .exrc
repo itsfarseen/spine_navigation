@@ -6,3 +6,6 @@ let g:quickrun_config = {
 
 set foldmethod=indent
 set foldlevel=1
+
+nnoremap <F5> :!python main.py<CR>
+
