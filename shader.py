@@ -2,29 +2,11 @@ import OpenGL.GL as gl
 
 
 class Shader:
-    vertexCode = """#version 330 core
-    uniform mat4 camera;
-    in vec3 position;
-    in vec3 color;
-
-    out vec3 f_color;
-
-    void main() {
-        f_color = color;
-        gl_Position = camera*vec4(position, 1.0);
-    }
-    """
-
-    fragmentCode = """#version 330 core
-    in vec3 f_color;
-    void main() {
-        gl_FragColor = vec4(f_color, 1.0);
-    }
-    """
-
-    def __init__(self):
+    def __init__(self, vertexCode, fragmentCode):
         self.compiled = False
         self.program = None
+        self.vertexCode = vertexCode
+        self.fragmentCode = fragmentCode
 
     def setup(self):
         program = gl.glCreateProgram()

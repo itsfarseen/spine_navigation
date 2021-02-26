@@ -6,7 +6,7 @@ import ctypes
 import matplotlib.pyplot as plt
 from voxels import sphere
 import pywavefront
-from shader import Shader
+from simple_shader import SimpleShader
 from window import Window
 from cube import CubeMesh
 from camera import Camera
@@ -67,7 +67,7 @@ def mouse(btn, action, mods, warp, x, y):
     last_y = y
 
 
-shader = Shader()
+shader = SimpleShader()
 cube = CubeMesh()
 window = Window(display, mousefn=mouse)
 camera = Camera()
