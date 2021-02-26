@@ -28,11 +28,11 @@ class SimpleShader(Shader):
 
     def setCameraMatrix(self, cameraMat4):
         self.use()
-        loc = self.getUniformLocation("camera")
+        loc = self._getUniformLocation("camera")
         gl.glUniformMatrix4fv(loc, 1, False, glm.value_ptr(cameraMat4))  # type: ignore
 
     def getPositionAttribLoc(self):
-        return self.getAttribLocation("position")
+        return self._getAttribLocation("position")
 
     def getColorAttribLoc(self):
-        return self.getAttribLocation("color")
+        return self._getAttribLocation("color")

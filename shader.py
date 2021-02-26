@@ -40,10 +40,10 @@ class Shader:
         self.program = program
         self.compiled = True
 
-    def getAttribLocation(self, attrib):
+    def _getAttribLocation(self, attrib):
         return gl.glGetAttribLocation(self.program, attrib)
 
-    def getUniformLocation(self, uniform):
+    def _getUniformLocation(self, uniform):
         return gl.glGetUniformLocation(self.program, uniform)
 
     def use(self):
