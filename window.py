@@ -53,13 +53,30 @@ class Window:
 
     def mouse(self, window, btn, action, mods):
         if self.mousefn is not None:
-            (self.mousefn)(btn, action, mods, None, None)
+            (self.mousefn)(btn, action, mods, False, None, None)
 
     def motion(self, window, x, y):
+        warp = False
+        if x > self.width():
+            x = 0
+            warp = True
+        elif x < 0:
+            x = self.width()
+            warp = True
+        if y > self.height():
+            y = 0
+            warp = True
+        elif y < 0:
+            y = self.height()
+            warp = True
+
+        if warp:
+            glfw.set_cursor_pos(self.window, x, y)
+
         (x, y) = self.screenToNDC(x, y)
 
         if self.mousefn is not None:
-            (self.mousefn)(None, None, None, x, y)
+            (self.mousefn)(None, None, None, warp, x, y)
 
     def run(self):
         while not glfw.window_should_close(self.window):

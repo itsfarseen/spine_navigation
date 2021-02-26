@@ -33,10 +33,9 @@ last_x = None
 last_y = None
 mode = None
 
-def mouse(btn, action, mods, x, y):
+def mouse(btn, action, mods, warp, x, y):
     global last_x, last_y, mode
     if action == glfw.PRESS and btn == glfw.MOUSE_BUTTON_3:
-
         if mods == glfw.MOD_SHIFT:
             mode = 'MOVE'
         else:
@@ -53,6 +52,7 @@ def mouse(btn, action, mods, x, y):
         and x is not None
         and y is not None
         and mode is not None
+        and not warp
     ):
         delta_x = x - last_x
         delta_y = y - last_y
