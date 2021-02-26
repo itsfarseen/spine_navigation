@@ -23,7 +23,7 @@ def setup():
 
 def display():
     gl.glClearColor(0.3, 0.4, 0.38, 1.0)
-    gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT) # type: ignore
+    gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)  # type: ignore
 
     cube.draw()
 
@@ -32,18 +32,18 @@ last_x = None
 last_y = None
 mode = None
 
+
 def mouse(btn, action, mods, warp, x, y):
     global last_x, last_y, mode
     if action == glfw.PRESS and btn == glfw.MOUSE_BUTTON_3:
         if mods == glfw.MOD_SHIFT:
-            mode = 'MOVE'
+            mode = "MOVE"
         else:
-            mode = 'ROTATE'
+            mode = "ROTATE"
         return
 
     if action == glfw.RELEASE:
         mode = None
-
 
     if (
         last_x is not None
@@ -55,9 +55,9 @@ def mouse(btn, action, mods, warp, x, y):
     ):
         delta_x = x - last_x
         delta_y = y - last_y
-        if mode == 'MOVE':
+        if mode == "MOVE":
             camera.move(delta_x, delta_y)
-        elif mode == 'ROTATE':
+        elif mode == "ROTATE":
             camera.rotate(delta_x, delta_y)
         else:
             raise ValueError("undefined mode", mode)
