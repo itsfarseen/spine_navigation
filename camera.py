@@ -3,17 +3,17 @@ import OpenGL.GL as gl
 
 
 class Camera:
-    def __init__(self):
-        self.cameraUniform = None  # set by setup()
+    def __init__(self, window, shader):
+        self.shader = shader
+        self.window = window
 
         self.position = glm.vec3(0.0, 5.0, 5.0)
         self.lookAt = glm.vec3(0.0, 0.0, 0.0)
 
         self._vecCache = {}
 
-    def setup(self, shader, window):
-        self.window = window
-        self.cameraUniform = shader.getUniformLocation("camera")
+    def setup(self):
+        self._update()
 
     def _fixTooSmall(self, name, val):
         # todo: this workaround is not working
@@ -47,7 +47,7 @@ class Camera:
 
         return (cameraPrincipal, cameraRight, cameraUp)
 
-    def update(self):
+    def _update(self):
         (cameraPrincipal, cameraRight, cameraUp) = self._getCamVecs()
 
         view = glm.lookAt(
@@ -57,9 +57,7 @@ class Camera:
             glm.radians(45.0), self.window.aspect(), 0.1, 100.0
         )
         cameraMatrix = proj * view
-        gl.glUniformMatrix4fv(
-            self.cameraUniform, 1, False, glm.value_ptr(cameraMatrix)
-        )  # type: ignore
+        self.shader.setCameraMatrix(cameraMatrix)
 
     def rotate(self, x, y):
         x_factor = 90.0
@@ -80,6 +78,8 @@ class Camera:
         posDirRotated = rot * posDir
         self.position = self.lookAt + glm.vec3(posDirRotated)
 
+        self._update()
+
     def move(self, x, y):
         amt = 4.0
 
@@ -89,3 +89,5 @@ class Camera:
 
         self.position += delta
         self.lookAt += delta
+
+        self._update()

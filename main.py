@@ -25,8 +25,6 @@ def display():
     gl.glClearColor(0.3, 0.4, 0.38, 1.0)
     gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT) # type: ignore
 
-    shader.use()
-    camera.update()
     cube.draw()
 
 
@@ -68,16 +66,16 @@ def mouse(btn, action, mods, warp, x, y):
 
 
 shader = SimpleShader()
-cube = CubeMesh()
+cube = CubeMesh(shader)
 window = Window(display, mousefn=mouse)
-camera = Camera()
+camera = Camera(window, shader)
 
 
 def main():
     window.setup()
     shader.setup()
-    cube.setup(shader)
-    camera.setup(shader, window)
+    cube.setup()
+    camera.setup()
 
     setup()
     window.run()

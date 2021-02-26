@@ -6,15 +6,15 @@ import ctypes
 class CubeMesh:
     vertices = [
         # Front
-        (0.5, 0.5, 0.5, 1.0, 0.0, 0.0), # red
-        (-0.5, 0.5, 0.5, 0.0, 1.0, 0.0), # green
-        (-0.5, -0.5, 0.5, 0.0, 0.0, 1.0), # blue
-        (0.5, -0.5, 0.5, 0.0, 0.0, 0.0), # black
+        (0.5, 0.5, 0.5, 1.0, 0.0, 0.0),  # red
+        (-0.5, 0.5, 0.5, 0.0, 1.0, 0.0),  # green
+        (-0.5, -0.5, 0.5, 0.0, 0.0, 1.0),  # blue
+        (0.5, -0.5, 0.5, 0.0, 0.0, 0.0),  # black
         # Back
-        (0.5, 0.5, -0.5, 1.0, 1.0, 0.0), # yellow
-        (-0.5, 0.5, -0.5, 1.0, 0.0, 1.0), # violet
-        (-0.5, -0.5, -0.5, 0.0, 1.0, 1.0), # cyan
-        (0.5, -0.5, -0.5, 0.5, 0.5, 0.5), # grey
+        (0.5, 0.5, -0.5, 1.0, 1.0, 0.0),  # yellow
+        (-0.5, 0.5, -0.5, 1.0, 0.0, 1.0),  # violet
+        (-0.5, -0.5, -0.5, 0.0, 1.0, 1.0),  # cyan
+        (0.5, -0.5, -0.5, 0.5, 0.5, 0.5),  # grey
     ]
 
     faces = [
@@ -38,10 +38,10 @@ class CubeMesh:
         (3, 7, 4),
     ]
 
-    def __init__(self):
-        pass
+    def __init__(self, shader):
+        self.shader = shader
 
-    def setup(self, shader):
+    def setup(self):
         # create VBO, upload data
         vbo = gl.glGenBuffers(1)  # type: ignore
         gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vbo)
@@ -68,25 +68,25 @@ class CubeMesh:
         gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vbo)
 
         # specify position attribute of VBO thus attaching VBO to VAO
-        loc = shader.getAttribLocation("position")
-        gl.glEnableVertexArrayAttrib(vao, loc)
+        positionLoc = self.shader.getPositionAttribLoc()
+        gl.glEnableVertexArrayAttrib(vao, positionLoc)
         gl.glVertexAttribPointer(
-            loc,
+            positionLoc,
             3,
             gl.GL_FLOAT,
             False,
             vbo_data.strides[0],
             ctypes.c_void_p(0),
         )
-        color = shader.getAttribLocation("color")
-        gl.glEnableVertexArrayAttrib(vao, color)
+        colorLoc = self.shader.getColorAttribLoc()
+        gl.glEnableVertexArrayAttrib(vao, colorLoc)
         gl.glVertexAttribPointer(
-            color,
+            colorLoc,
             3,
             gl.GL_FLOAT,
             False,
             vbo_data.strides[0],
-            ctypes.c_void_p(3*4),
+            ctypes.c_void_p(3 * 4),
         )
 
         # attach EBO to VAO
@@ -96,10 +96,11 @@ class CubeMesh:
         gl.glBindVertexArray(0)
 
     def draw(self):
+        self.shader.use()
         gl.glBindVertexArray(self.vao)
         gl.glDrawElements(
             gl.GL_TRIANGLES,
-            len(self.faces*3),
+            len(self.faces * 3),
             gl.GL_UNSIGNED_INT,
             ctypes.c_void_p(0),
         )  # type: ignore

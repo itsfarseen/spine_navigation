@@ -1,4 +1,7 @@
 from shader import Shader
+import OpenGL.GL as gl
+import glm
+
 
 class SimpleShader(Shader):
     def __init__(self):
@@ -22,3 +25,14 @@ class SimpleShader(Shader):
         }
         """
         super().__init__(vertexCode, fragmentCode)
+
+    def setCameraMatrix(self, cameraMat4):
+        self.use()
+        loc = self.getUniformLocation("camera")
+        gl.glUniformMatrix4fv(loc, 1, False, glm.value_ptr(cameraMat4))  # type: ignore
+
+    def getPositionAttribLoc(self):
+        return self.getAttribLocation("position")
+
+    def getColorAttribLoc(self):
+        return self.getAttribLocation("color")
