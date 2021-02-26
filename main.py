@@ -18,11 +18,12 @@ def setup():
     gl.glViewport(0, 0, window.width(), window.height())
     gl.glEnable(gl.GL_BLEND)
     gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)
+    gl.glEnable(gl.GL_DEPTH_TEST)
 
 
 def display():
     gl.glClearColor(0.3, 0.4, 0.38, 1.0)
-    gl.glClear(gl.GL_COLOR_BUFFER_BIT)
+    gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT) # type: ignore
 
     shader.use()
     camera.update()
