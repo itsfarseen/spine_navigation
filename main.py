@@ -31,26 +31,37 @@ def display():
 
 last_x = None
 last_y = None
-move = False
-
+mode = None
 
 def mouse(btn, action, mods, x, y):
-    global last_x, last_y, move
-    if action == glfw.PRESS:
-        last_x = None
-        last_y = None
-        move = mods == glfw.MOD_SHIFT
+    global last_x, last_y, mode
+    if action == glfw.PRESS and btn == glfw.MOUSE_BUTTON_3:
+
+        if mods == glfw.MOD_SHIFT:
+            mode = 'MOVE'
+        else:
+            mode = 'ROTATE'
         return
+
+    if action == glfw.RELEASE:
+        mode = None
+
 
     if (
         last_x is not None
         and last_y is not None
         and x is not None
         and y is not None
+        and mode is not None
     ):
         delta_x = x - last_x
         delta_y = y - last_y
-        camera.move(delta_x, delta_y)
+        if mode == 'MOVE':
+            camera.move(delta_x, delta_y)
+        elif mode == 'ROTATE':
+            camera.rotate(delta_x, delta_y)
+        else:
+            raise ValueError("undefined mode", mode)
     last_x = x
     last_y = y
 
