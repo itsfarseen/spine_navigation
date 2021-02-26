@@ -6,11 +6,12 @@ class Window:
     WIN_HEIGHT = 480
     WIN_ASPECT = WIN_WIDTH / WIN_HEIGHT
 
-    def __init__(self, displayfn, keyboardfn=None, mousefn=None):
+    def __init__(self, displayfn, keyboardfn=None, mousefn=None, scrollfn=None):
         self.window = None
         self.displayfn = displayfn
         self.keyboardfn = keyboardfn
         self.mousefn = mousefn
+        self.scrollfn = scrollfn
 
     def setup(self):
         glfw.init()
@@ -26,6 +27,10 @@ class Window:
         glfw.set_mouse_button_callback(window, self.mouse)
         glfw.set_cursor_pos_callback(window, self.motion)
         glfw.set_key_callback(window, self.keyboard)
+        if self.scrollfn is not None:
+            glfw.set_scroll_callback(
+                window, lambda win, x, y: self.scrollfn(x, y)
+            )
         glfw.make_context_current(window)
 
         self.window = window

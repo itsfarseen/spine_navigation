@@ -96,3 +96,13 @@ class Camera:
         self.lookAt += delta
 
         self._update()
+
+    def zoom(self, z):
+        amt = 1.0
+
+        (cameraPrincipal, cameraRight, cameraUp) = self._getCamVecs()
+        delta = amt * z * cameraPrincipal
+
+        self.position += delta
+
+        self._update()

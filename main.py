@@ -36,6 +36,10 @@ last_y = None
 mode = None
 
 
+def scroll(x, y):
+    camera.zoom(y)
+
+
 def mouse(btn, action, mods, warp, x, y):
     global last_x, last_y, mode
     if action == glfw.PRESS and btn == glfw.MOUSE_BUTTON_3:
@@ -74,7 +78,7 @@ cube = CubeMesh(cube_shader)
 grid_shader = GridShader()
 grid = GridMesh(grid_shader)
 
-window = Window(display, mousefn=mouse)
+window = Window(display, mousefn=mouse, scrollfn=scroll)
 camera = Camera(window, [cube_shader, grid_shader])
 
 
