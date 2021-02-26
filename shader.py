@@ -3,10 +3,11 @@ import OpenGL.GL as gl
 
 class Shader:
     vertexCode = """#version 330 core
+    uniform mat4 camera;
     in vec3 position;
 
     void main() {
-        gl_Position = vec4(position, 1.0);
+        gl_Position = camera*vec4(position, 1.0);
     }
     """
 
@@ -54,6 +55,9 @@ class Shader:
 
     def getAttribLocation(self, attrib):
         return gl.glGetAttribLocation(self.program, attrib)
+
+    def getUniformLocation(self, uniform):
+        return gl.glGetUniformLocation(self.program, uniform)
 
     def use(self):
         assert (

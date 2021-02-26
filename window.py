@@ -1,44 +1,72 @@
-import OpenGL.GLUT as glut
+import glfw
+
 
 class Window:
     WIN_WIDTH = 480
     WIN_HEIGHT = 480
     WIN_ASPECT = WIN_WIDTH / WIN_HEIGHT
 
-    def __init__(self, displayfn):
+    def __init__(self, displayfn, keyboardfn=None, mousefn=None):
         self.window = None
         self.displayfn = displayfn
+        self.keyboardfn = keyboardfn
+        self.mousefn = mousefn
 
     def setup(self):
-        global window
-        glut.glutInit()
-        glut.glutInitContextVersion(3, 3)
-        glut.glutInitContextProfile(glut.GLUT_CORE_PROFILE)
-        glut.glutInitDisplayMode(glut.GLUT_DOUBLE | glut.GLUT_RGBA)  # type: ignore
-        window = glut.glutCreateWindow("Hello World [Float]")
-        glut.glutReshapeFunc(self.reshape)
-        glut.glutDisplayFunc(self.displayfn)
-        glut.glutMouseFunc(self.mouse)
-        glut.glutKeyboardFunc(self.keyboard)
+        glfw.init()
+        glfw.window_hint(glfw.CONTEXT_VERSION_MAJOR, 3)
+        glfw.window_hint(glfw.CONTEXT_VERSION_MINOR, 3)
+        glfw.window_hint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
+        glfw.window_hint(glfw.RESIZABLE, glfw.FALSE)
 
-    def reshape(self, width, height):
-        glut.glutReshapeWindow(self.WIN_WIDTH, self.WIN_HEIGHT)
+        window = glfw.create_window(
+            self.WIN_WIDTH, self.WIN_HEIGHT, "Hello World [Float]", None, None
+        )
+        glfw.set_window_size_callback(window, self.reshape)
+        glfw.set_mouse_button_callback(window, self.mouse)
+        glfw.set_cursor_pos_callback(window, self.motion)
+        glfw.set_key_callback(window, self.keyboard)
+        glfw.make_context_current(window)
 
-    def keyboard(self, key, x, y):
-        if key in (b"q",):
-            glut.glutLeaveMainLoop()
+        self.window = window
+
+    def reshape(self, window, width, height):
+        glfw.set_window_size(self.window, self.WIN_WIDTH, self.WIN_HEIGHT)
+
+    def keyboard(self, window, key, scancode, action, mods):
+        if key == glfw.KEY_ESCAPE:
+            glfw.set_window_should_close(window, glfw.TRUE)
             return
-        glut.glutPostRedisplay()
 
-    def mouse(self, btn, state, x, y):
-        if state == glut.GLUT_UP:
-            # process only button press and not release
-            # (scroll wheel movements are interpreted as button presses)
-            return
-        glut.glutPostRedisplay()
+        if self.keyboardfn is not None:
+            (self.keyboardfn)(key, action, mods)
+
+    def screenToNDC(self, x, y):
+        x -= self.width() / 2
+        x /= self.width() / 2
+
+        y -= self.height() / 2
+        y /= self.height() / 2
+        y = -y
+
+        return (x, y)
+
+    def mouse(self, window, btn, action, mods):
+        if self.mousefn is not None:
+            (self.mousefn)(btn, action, mods, None, None)
+
+    def motion(self, window, x, y):
+        (x, y) = self.screenToNDC(x, y)
+
+        if self.mousefn is not None:
+            (self.mousefn)(None, None, None, x, y)
 
     def run(self):
-        glut.glutMainLoop()
+        while not glfw.window_should_close(self.window):
+            self.displayfn()
+            glfw.swap_buffers(self.window)
+            glfw.poll_events()
+        glfw.terminate()
 
     def width(self):
         return self.WIN_WIDTH
