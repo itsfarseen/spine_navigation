@@ -11,3 +11,5 @@ nnoremap <F5> :!python main.py<CR>
 
 au BufWrite *.py :Autoformat
 au BufWrite *.exrc :Autoformat
+
+let g:formatters_python = ['black']
