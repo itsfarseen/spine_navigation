@@ -45,12 +45,12 @@ class ObjShader(Shader):
         vec3 x;
         void main() {
             // to prevent optimizing out of attributes
-            x = 0.01*vec3(f_uv, 1.0) + 0.01*f_normal;
+            x = 0.01*vec3(f_uv, 1.0) + 0.01*f_normal + 0.01*color;
 
             vec3 norm = normalize(f_normal);
             vec3 lightDir = normalize(light - f_pos);
             float diff = max(dot(norm, lightDir), 0.0);
-            vec3 shade = color + x;
+            vec3 shade = diff*color + x;
 
             gl_FragColor = vec4(shade, 1.0);
         }

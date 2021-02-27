@@ -87,12 +87,10 @@ class ObjMesh:
                 elif line.startswith("vt "):
                     line = line.split()[1:]
                     t = (float(line[0]), float(line[1]))
-                    t = (0, 0)
                     tex.append(t)
                 elif line.startswith("vn "):
                     line = line.split()[1:]
                     n = (float(line[0]), float(line[1]), float(line[2]))
-                    n = (0, 0, 0)
                     normals.append(n)
                 elif line.startswith("f "):
                     line = line.split()[1:]
