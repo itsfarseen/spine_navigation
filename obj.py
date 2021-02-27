@@ -6,10 +6,10 @@ import ctypes
 
 class ObjMesh:
     def __init__(self, filename, shader):
-        self._load(filename)
+        self._load_obj(filename)
         self.shader = shader
 
-    def _load(self, filename):
+    def _load_obj(self, filename):
         vertices = []
         tex = []
         normals = []
