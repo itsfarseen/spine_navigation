@@ -70,7 +70,7 @@ class ObjMesh:
         faces_combined = []
         with open(filename, "r") as file:
             curMtl = None
-            for line in file.readlines():
+            for i, line in enumerate(file.readlines()):
                 if line.startswith("mtllib "):
                     mtlfilename = line.split()[1]
                     self._load_mtl(
@@ -104,6 +104,8 @@ class ObjMesh:
                     else:
                         raise ValueError(
                             "Face with more than 4 edges not supported",
+                            i + 1,
+                            line,
                             len(line),
                         )
                     for face in faces:

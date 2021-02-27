@@ -23,14 +23,15 @@ def setup():
     gl.glEnable(gl.GL_BLEND)
     gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)
     gl.glEnable(gl.GL_DEPTH_TEST)
+    gl.glEnable(gl.GL_FRAMEBUFFER_SRGB)
 
 
 def display():
     gl.glClearColor(0.3, 0.4, 0.38, 1.0)
     gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)  # type: ignore
 
-    # cube.draw()
-    obj.draw()
+    instrument_obj.draw()
+    # operating_table_obj.draw()
     grid.draw()
 
 
@@ -82,7 +83,8 @@ grid_shader = GridShader()
 grid = GridMesh(grid_shader)
 
 obj_shader = ObjShader()
-obj = ObjMesh("./assets/OperatingTable.obj", obj_shader)
+operating_table_obj = ObjMesh("./assets/OperatingTable.obj", obj_shader)
+instrument_obj = ObjMesh("./assets/instrument1.obj", obj_shader)
 
 window = Window(display, mousefn=mouse, scrollfn=scroll)
 camera = Camera(window, [cube_shader, grid_shader, obj_shader])
@@ -95,7 +97,9 @@ def main():
     grid_shader.setup()
     grid.setup()
     obj_shader.setup()
-    obj.setup()
+    operating_table_obj.setup()
+    instrument_obj.setup()
+
     camera.setup()
 
     setup()

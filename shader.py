@@ -1,4 +1,5 @@
 import OpenGL.GL as gl
+import glm
 
 
 class Shader:
@@ -65,7 +66,7 @@ class Shader:
         self.use()
         loc = self._getUniformLocation(name)
         assert loc != -1, name
-        gl.glUniformMatrix4fv(loc, val)  # type: ignore
+        gl.glUniformMatrix4fv(loc, 1, False, glm.value_ptr(val))  # type: ignore
 
     def use(self):
         assert (

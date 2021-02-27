@@ -6,7 +6,7 @@ import glm
 class GridShader(Shader):
     def __init__(self):
         vertexCode = """#version 330 core
-        uniform mat4 camera;
+        uniform mat4 view, projection;
         in vec3 position;
 
         out vec3 f_coord;
@@ -14,7 +14,7 @@ class GridShader(Shader):
 
         void main() {
             f_coord = position;
-            gl_Position = camera*vec4(position, 1.0);
+            gl_Position = projection*view*vec4(position, 1.0);
             f_z = gl_Position.z;
         }
         """
@@ -42,10 +42,11 @@ class GridShader(Shader):
         """
         super().__init__(vertexCode, fragmentCode)
 
-    def setCameraMatrix(self, cameraMat4):
-        self.use()
-        loc = self._getUniformLocation("camera")
-        gl.glUniformMatrix4fv(loc, 1, False, glm.value_ptr(cameraMat4))  # type: ignore
+    def setViewMatrix(self, mat4):
+        self._setMat4("view", mat4)
+
+    def setProjectionMatrix(self, mat4):
+        self._setMat4("projection", mat4)
 
     def getPositionAttribLoc(self):
         return self._getAttribLocation("position")
