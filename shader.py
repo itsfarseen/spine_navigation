@@ -46,6 +46,27 @@ class Shader:
     def _getUniformLocation(self, uniform):
         return gl.glGetUniformLocation(self.program, uniform)
 
+    def _setFloat(self, name, val):
+        self.use()
+        loc = self._getUniformLocation(name)
+        assert loc != -1, name
+        gl.glUniform1f(loc, val)
+
+    def _setVec3(self, name, val):
+        self.use()
+        loc = self._getUniformLocation(name)
+        assert loc != -1, name
+        if hasattr(val, "x"):
+            gl.glUniform3f(loc, val.x, val.y, val.z)
+        else:
+            gl.glUniform3f(loc, val[0], val[1], val[2])
+
+    def _setMat4(self, name, val):
+        self.use()
+        loc = self._getUniformLocation(name)
+        assert loc != -1, name
+        gl.glUniformMatrix4fv(loc, val)  # type: ignore
+
     def use(self):
         assert (
             self.compiled
