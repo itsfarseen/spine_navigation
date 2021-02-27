@@ -1,3 +1,5 @@
+from obj_shader import ObjShader
+from obj import ObjMesh
 import OpenGL.GL as gl
 import nibabel as nib
 import glm
@@ -27,7 +29,8 @@ def display():
     gl.glClearColor(0.3, 0.4, 0.38, 1.0)
     gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)  # type: ignore
 
-    cube.draw()
+    # cube.draw()
+    obj.draw()
     grid.draw()
 
 
@@ -78,8 +81,11 @@ cube = CubeMesh(cube_shader)
 grid_shader = GridShader()
 grid = GridMesh(grid_shader)
 
+obj_shader = ObjShader()
+obj = ObjMesh("./assets/OperatingTable.obj", obj_shader)
+
 window = Window(display, mousefn=mouse, scrollfn=scroll)
-camera = Camera(window, [cube_shader, grid_shader])
+camera = Camera(window, [cube_shader, grid_shader, obj_shader])
 
 
 def main():
@@ -88,6 +94,8 @@ def main():
     cube.setup()
     grid_shader.setup()
     grid.setup()
+    obj_shader.setup()
+    obj.setup()
     camera.setup()
 
     setup()

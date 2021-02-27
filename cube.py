@@ -100,7 +100,7 @@ class CubeMesh:
         gl.glBindVertexArray(self.vao)
         gl.glDrawElements(
             gl.GL_TRIANGLES,
-            len(self.faces * 3),
+            len(self.faces) * 3,
             gl.GL_UNSIGNED_INT,
             ctypes.c_void_p(0),
         )  # type: ignore
