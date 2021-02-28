@@ -114,10 +114,7 @@ class Window:
         glfw.terminate()
 
     def width(self):
-        if self.wide:
-            return self.WIN_WIDTH * 2
-        else:
-            return self.WIN_WIDTH
+        return self.WIN_WIDTH
 
     def height(self):
         return self.WIN_HEIGHT
