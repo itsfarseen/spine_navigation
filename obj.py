@@ -156,7 +156,7 @@ class ObjMesh:
         self.vertices = np.array(vertices_combined, dtype=vertices_dtype)
         self.faces = np.array(faces_combined, dtype=(np.uint32, 3))
 
-    def setup(self):
+    def uploadMeshData(self):
         # create VBO, upload data
         vbo = gl.glGenBuffers(1)  # type: ignore
         gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vbo)

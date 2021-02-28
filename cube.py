@@ -41,7 +41,7 @@ class CubeMesh:
     def __init__(self, shader):
         self.shader = shader
 
-    def setup(self):
+    def uploadMeshData(self):
         # create VBO, upload data
         vbo = gl.glGenBuffers(1)  # type: ignore
         gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vbo)

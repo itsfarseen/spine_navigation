@@ -18,110 +18,124 @@ import logging
 import glfw
 
 
-def setup():
-    gl.glViewport(0, 0, window.width(), window.height())
-    gl.glEnable(gl.GL_BLEND)
-    gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)
-    gl.glEnable(gl.GL_DEPTH_TEST)
-    gl.glEnable(gl.GL_FRAMEBUFFER_SRGB)
+class App:
+    def __init__(self):
+        self.window = Window(self.display)
+        self.window.setupContext()
+        self.window.addKeyboardHandler(self.keyboard)
 
+        self.grid_shader = GridShader()
+        self.grid_shader.compile()
+        self.grid = GridMesh(self.grid_shader)
+        self.grid.uploadMeshData()
 
-def display():
-    if renderGleonsOnly:
-        gl.glClearColor(0.0, 0.0, 0.0, 1.0)
-        gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)  # type: ignore
-        obj_shader.renderMaterialOnly(1)
-        instrument_obj.draw()
+        self.obj_shader = ObjShader()
+        self.obj_shader.compile()
+        self.operating_table_obj = ObjMesh(
+            "./assets/OperatingTable.obj", self.obj_shader
+        )
+        self.operating_table_obj.uploadMeshData()
+        self.instrument_obj = ObjMesh(
+            "./assets/instrument1.obj", self.obj_shader
+        )
+        self.instrument_obj.uploadMeshData()
 
-    else:
-        gl.glClearColor(0.3, 0.4, 0.38, 1.0)
-        gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)  # type: ignore
+        self.camera = Camera(self.window, [self.grid_shader, self.obj_shader])
+        self.camera.setAllUniforms()
 
-        obj_shader.renderMaterialOnly(-1)
-        instrument_obj.draw()
-        operating_table_obj.draw()
-        grid.draw()
+        self.cameraControls = CameraControls(self.camera)
+        self.cameraControls.setupHandlers(self.window)
 
+        self.renderGleonsOnly = False
 
-last_x = None
-last_y = None
-mode = None
+        gl.glEnable(gl.GL_BLEND)
+        gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)
+        gl.glEnable(gl.GL_DEPTH_TEST)
+        gl.glEnable(gl.GL_FRAMEBUFFER_SRGB)
 
-
-def scroll(x, y):
-    camera.zoom(y)
-
-
-def mouse(btn, action, mods, warp, x, y):
-    global last_x, last_y, mode
-    if action == glfw.PRESS and btn == glfw.MOUSE_BUTTON_3:
-        if mods == glfw.MOD_SHIFT:
-            mode = "MOVE"
+    def display(self):
+        gl.glViewport(0, 0, self.window.width(), self.window.height())
+        if self.renderGleonsOnly:
+            gl.glClearColor(0.0, 0.0, 0.0, 1.0)
+            self.obj_shader.renderMaterialOnly(1)
+            objectsToDraw = [self.instrument_obj]
         else:
-            mode = "ROTATE"
-        return
+            gl.glClearColor(0.3, 0.4, 0.38, 1.0)
+            self.obj_shader.renderMaterialOnly(-1)
+            objectsToDraw = [
+                self.instrument_obj,
+                self.operating_table_obj,
+                self.grid,
+            ]
 
-    if action == glfw.RELEASE:
-        mode = None
+        gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)  # type: ignore
+        for obj in objectsToDraw:
+            obj.draw()
 
-    if (
-        last_x is not None
-        and last_y is not None
-        and x is not None
-        and y is not None
-        and mode is not None
-        and not warp
-    ):
-        delta_x = x - last_x
-        delta_y = y - last_y
-        if mode == "MOVE":
-            camera.move(delta_x, delta_y)
-        elif mode == "ROTATE":
-            camera.rotate(delta_x, delta_y)
-        else:
-            raise ValueError("undefined mode", mode)
-    last_x = x
-    last_y = y
+    def keyboard(self, key, action, mods):
+        if key == glfw.KEY_TAB and action == glfw.PRESS:
+            self.renderGleonsOnly = not self.renderGleonsOnly
+
+    def run(self):
+        self.window.run()
 
 
-renderGleonsOnly = False
+class CameraControls:
+    def __init__(self, camera):
+        self.camera = camera
 
+        self.last_x = None
+        self.last_y = None
+        self.mode = None
 
-def keyboard(key, action, mods):
-    global renderGleonsOnly
-    if key == glfw.KEY_TAB and action == glfw.PRESS:
-        renderGleonsOnly = not renderGleonsOnly
+    def setupHandlers(self, window):
+        window.addScrollHandler(self.scroll)
+        window.addMouseHandler(self.mouse)
 
+    def scroll(self, x, y):
+        self.camera.zoom(y)
+        return Window.EVENT_CONSUMED
 
-cube_shader = SimpleShader()
-cube = CubeMesh(cube_shader)
+    def mouse(self, btn, action, mods, warp, x, y):
+        if action == glfw.PRESS and btn == glfw.MOUSE_BUTTON_3:
+            if mods == glfw.MOD_SHIFT:
+                self.mode = "MOVE"
+            else:
+                self.mode = "ROTATE"
+            self.last_x = x
+            self.last_y = y
+            return Window.EVENT_CONSUMED
 
-grid_shader = GridShader()
-grid = GridMesh(grid_shader)
+        if action == glfw.RELEASE and self.mode is not None:
+            self.mode = None
+            self.last_x = x
+            self.last_y = y
+            return Window.EVENT_CONSUMED
 
-obj_shader = ObjShader()
-operating_table_obj = ObjMesh("./assets/OperatingTable.obj", obj_shader)
-instrument_obj = ObjMesh("./assets/instrument1.obj", obj_shader)
+        if (
+            self.last_x is not None
+            and self.last_y is not None
+            and x is not None
+            and y is not None
+            and self.mode is not None
+            and not warp
+        ):
+            delta_x = x - self.last_x
+            delta_y = y - self.last_y
+            if self.mode == "MOVE":
+                self.camera.move(delta_x, delta_y)
+            elif self.mode == "ROTATE":
+                self.camera.rotate(delta_x, delta_y)
+            else:
+                raise ValueError("undefined mode", self.mode)
+            self.last_x = x
+            self.last_y = y
+            return Window.EVENT_CONSUMED
 
-window = Window(display, mousefn=mouse, scrollfn=scroll, keyboardfn=keyboard)
-camera = Camera(window, [cube_shader, grid_shader, obj_shader])
-
-
-def main():
-    window.setup()
-    cube_shader.setup()
-    cube.setup()
-    grid_shader.setup()
-    grid.setup()
-    obj_shader.setup()
-    operating_table_obj.setup()
-    instrument_obj.setup()
-
-    camera.setup()
-
-    setup()
-    window.run()
+        self.last_x = x
+        self.last_y = y
 
 
 if __name__ == "__main__":
-    main()
+    app = App()
+    app.run()

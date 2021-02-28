@@ -9,7 +9,7 @@ class Shader:
         self.vertexCode = vertexCode
         self.fragmentCode = fragmentCode
 
-    def setup(self):
+    def compile(self):
         program = gl.glCreateProgram()
         vertex = gl.glCreateShader(gl.GL_VERTEX_SHADER)
         fragment = gl.glCreateShader(gl.GL_FRAGMENT_SHADER)
@@ -77,5 +77,5 @@ class Shader:
     def use(self):
         assert (
             self.compiled
-        ), "Please call setup() to compile the shader before use."
+        ), "Please call compile() to compile the shader before use."
         gl.glUseProgram(self.program)

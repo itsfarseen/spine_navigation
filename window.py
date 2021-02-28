@@ -2,18 +2,20 @@ import glfw
 
 
 class Window:
+    EVENT_CONSUMED = "CONSUMED"
+
     WIN_WIDTH = 480
     WIN_HEIGHT = 480
     WIN_ASPECT = WIN_WIDTH / WIN_HEIGHT
 
-    def __init__(self, displayfn, keyboardfn=None, mousefn=None, scrollfn=None):
+    def __init__(self, displayfn):
         self.window = None
         self.displayfn = displayfn
-        self.keyboardfn = keyboardfn
-        self.mousefn = mousefn
-        self.scrollfn = scrollfn
+        self.keyboardfns = []
+        self.mousefns = []
+        self.scrollfns = []
 
-    def setup(self):
+    def setupContext(self):
         glfw.init()
         glfw.window_hint(glfw.CONTEXT_VERSION_MAJOR, 3)
         glfw.window_hint(glfw.CONTEXT_VERSION_MINOR, 3)
@@ -27,10 +29,7 @@ class Window:
         glfw.set_mouse_button_callback(window, self.mouse)
         glfw.set_cursor_pos_callback(window, self.motion)
         glfw.set_key_callback(window, self.keyboard)
-        if self.scrollfn is not None:
-            glfw.set_scroll_callback(
-                window, lambda win, x, y: self.scrollfn(x, y)
-            )
+        glfw.set_scroll_callback(window, self.scroll)
         glfw.make_context_current(window)
 
         self.window = window
@@ -43,8 +42,9 @@ class Window:
             glfw.set_window_should_close(window, glfw.TRUE)
             return
 
-        if self.keyboardfn is not None:
-            (self.keyboardfn)(key, action, mods)
+        for keyboardfn in self.keyboardfns:
+            if keyboardfn(key, action, mods) == Window.EVENT_CONSUMED:
+                break
 
     def screenToNDC(self, x, y):
         x -= self.width() / 2
@@ -57,8 +57,17 @@ class Window:
         return (x, y)
 
     def mouse(self, window, btn, action, mods):
-        if self.mousefn is not None:
-            (self.mousefn)(btn, action, mods, False, None, None)
+        for mousefn in self.mousefns:
+            if (
+                mousefn(btn, action, mods, False, None, None)
+                == Window.EVENT_CONSUMED
+            ):
+                break
+
+    def scroll(self, window, x, y):
+        for scrollfn in self.scrollfns:
+            if scrollfn(x, y) == Window.EVENT_CONSUMED:
+                break
 
     def motion(self, window, x, y):
         warp = False
@@ -80,8 +89,9 @@ class Window:
 
         (x, y) = self.screenToNDC(x, y)
 
-        if self.mousefn is not None:
-            (self.mousefn)(None, None, None, warp, x, y)
+        for mousefn in self.mousefns:
+            if mousefn(None, None, None, warp, x, y) == Window.EVENT_CONSUMED:
+                break
 
     def run(self):
         while not glfw.window_should_close(self.window):
@@ -98,3 +108,12 @@ class Window:
 
     def aspect(self):
         return self.WIN_ASPECT
+
+    def addScrollHandler(self, fn):
+        self.scrollfns.append(fn)
+
+    def addMouseHandler(self, fn):
+        self.mousefns.append(fn)
+
+    def addKeyboardHandler(self, fn):
+        self.keyboardfns.append(fn)

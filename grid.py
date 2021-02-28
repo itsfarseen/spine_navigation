@@ -16,7 +16,7 @@ class GridMesh:
     def __init__(self, shader):
         self.shader = shader
 
-    def setup(self):
+    def uploadMeshData(self):
         vbo = gl.glGenBuffers(1)  # type: ignore
         gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vbo)
         vbo_data = np.array(self.vertices, dtype=(np.float32, 3))

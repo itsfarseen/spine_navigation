@@ -78,8 +78,8 @@ class ObjShader(Shader):
         """
         super().__init__(vertexCode, fragmentCode)
 
-    def setup(self):
-        super().setup()
+    def compile(self):
+        super().compile()
         # some drivers don't respect default uniform values set in shader
         self.setModelMatrix(glm.identity(glm.mat4))
 

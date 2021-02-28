@@ -13,8 +13,7 @@ class Camera:
         self._vecCache = {}
 
     def setup(self):
-        self._updateProjection()
-        self._updateView()
+        self.setAllUniforms()
 
     def _fixTooSmall(self, name, val):
         # todo: this workaround is not working
@@ -48,7 +47,7 @@ class Camera:
 
         return (cameraPrincipal, cameraRight, cameraUp)
 
-    def _updateProjection(self):
+    def setProjectionUniform(self):
         proj = glm.perspective(
             glm.radians(45.0), self.window.aspect(), 0.1, 100.0
         )
@@ -58,7 +57,7 @@ class Camera:
         else:
             self.shader.setProjectionMatrix(proj)
 
-    def _updateView(self):
+    def setViewUniform(self):
         (cameraPrincipal, cameraRight, cameraUp) = self._getCamVecs()
 
         view = glm.lookAt(
@@ -70,6 +69,10 @@ class Camera:
                 shader.setViewMatrix(view)
         else:
             self.shader.setViewMatrix(view)
+
+    def setAllUniforms(self):
+        self.setProjectionUniform()
+        self.setViewUniform()
 
     def rotate(self, x, y):
         x_factor = 90.0
@@ -90,7 +93,7 @@ class Camera:
         posDirRotated = rot * posDir
         self.position = self.lookAt + glm.vec3(posDirRotated)
 
-        self._updateView()
+        self.setViewUniform()
 
     def move(self, x, y):
         amt = 4.0
@@ -102,7 +105,7 @@ class Camera:
         self.position += delta
         self.lookAt += delta
 
-        self._updateView()
+        self.setViewUniform()
 
     def zoom(self, z):
         amt = 1.0
@@ -112,4 +115,4 @@ class Camera:
 
         self.position += delta
 
-        self._updateView()
+        self.setViewUniform()
