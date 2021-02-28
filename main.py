@@ -42,11 +42,25 @@ class App:
         )
         self.instrument_obj.uploadMeshData()
 
-        self.camera = Camera(self.window, [self.grid_shader, self.obj_shader])
-        self.camera.setAllUniforms()
+        self.stereoCamActive = False
 
+        self.camera = Camera(self.window, [self.grid_shader, self.obj_shader])
         self.cameraControls = CameraControls(self.camera)
         self.cameraControls.installHandlers(self.window)
+
+        self.stereoCamL = Camera(
+            self.window, [self.grid_shader, self.obj_shader]
+        )
+        self.stereoCamR = Camera(
+            self.window, [self.grid_shader, self.obj_shader]
+        )
+
+        self.stereoCamL.moveTo(0.29, 1.7128, -2)
+        self.stereoCamR.moveTo(-0.29, 1.7128, -2)
+
+        stereoCamPose = (0, -0.5, 1)
+        self.stereoCamL.lookDir(*stereoCamPose)
+        self.stereoCamR.lookDir(*stereoCamPose)
 
         self.renderGleonsOnly = False
 
@@ -57,6 +71,7 @@ class App:
 
     def display(self):
         gl.glViewport(0, 0, self.window.width(), self.window.height())
+
         if self.renderGleonsOnly:
             gl.glClearColor(0.0, 0.0, 0.0, 1.0)
             self.obj_shader.renderMaterialOnly(1)
@@ -71,12 +86,37 @@ class App:
             ]
 
         gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)  # type: ignore
-        for obj in objectsToDraw:
-            obj.draw()
+
+        if self.stereoCamActive:
+            self.window.setWide(True)
+            gl.glViewport(
+                0, 0, int(self.window.width() / 2), self.window.height()
+            )
+            self.stereoCamL.setAllUniforms()
+            for obj in objectsToDraw:
+                obj.draw()
+            gl.glViewport(
+                int(self.window.width() / 2),
+                0,
+                int(self.window.width() / 2),
+                self.window.height(),
+            )
+            self.stereoCamR.setAllUniforms()
+            for obj in objectsToDraw:
+                obj.draw()
+        else:
+            self.window.setWide(False)
+            gl.glViewport(0, 0, self.window.width(), self.window.height())
+            self.camera.setAllUniforms()
+            for obj in objectsToDraw:
+                obj.draw()
 
     def keyboard(self, key, action, mods):
         if key == glfw.KEY_TAB and action == glfw.PRESS:
             self.renderGleonsOnly = not self.renderGleonsOnly
+
+        if key == glfw.KEY_BACKSPACE and action == glfw.PRESS:
+            self.stereoCamActive = not self.stereoCamActive
 
     def run(self):
         self.window.run()

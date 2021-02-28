@@ -14,6 +14,11 @@ class Window:
         self.keyboardfns = []
         self.mousefns = []
         self.scrollfns = []
+        self.wide = False
+
+    def setWide(self, val):
+        self.wide = val
+        self._adjustSize()
 
     def setupContext(self):
         glfw.init()
@@ -34,8 +39,16 @@ class Window:
 
         self.window = window
 
+    def _adjustSize(self):
+        if self.wide:
+            glfw.set_window_size(
+                self.window, self.WIN_WIDTH * 2, self.WIN_HEIGHT
+            )
+        else:
+            glfw.set_window_size(self.window, self.WIN_WIDTH, self.WIN_HEIGHT)
+
     def reshape(self, window, width, height):
-        glfw.set_window_size(self.window, self.WIN_WIDTH, self.WIN_HEIGHT)
+        self._adjustSize()
 
     def keyboard(self, window, key, scancode, action, mods):
         if key == glfw.KEY_ESCAPE:
@@ -101,7 +114,10 @@ class Window:
         glfw.terminate()
 
     def width(self):
-        return self.WIN_WIDTH
+        if self.wide:
+            return self.WIN_WIDTH * 2
+        else:
+            return self.WIN_WIDTH
 
     def height(self):
         return self.WIN_HEIGHT

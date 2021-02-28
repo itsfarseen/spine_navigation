@@ -8,7 +8,7 @@ class Camera:
         self.window = window
 
         self.position = glm.vec3(0.0, 5.0, 5.0)
-        self.lookAt = glm.vec3(0.0, 0.0, 0.0)
+        self.lookAtPos = glm.vec3(0.0, 0.0, 0.0)
 
         self._vecCache = {}
 
@@ -31,7 +31,7 @@ class Camera:
         worldUp = glm.vec3(0.0, 1.0, 0.0)
 
         cameraPrincipal = self._fixTooSmall(
-            "principal", self.lookAt - self.position
+            "principal", self.lookAtPos - self.position
         )
         cameraPrincipal = glm.normalize(cameraPrincipal)
 
@@ -74,6 +74,22 @@ class Camera:
         self.setProjectionUniform()
         self.setViewUniform()
 
+    def moveTo(self, x, y, z):
+        moveTo = glm.vec3(x, y, z)
+        delta = moveTo - self.position
+        self.position += delta
+        self.lookAtPos += delta
+        self.setViewUniform()
+
+    def lookAt(self, x, y, z):
+        self.lookAtPos = glm.vec3(x, y, z)
+        self.setViewUniform()
+
+    def lookDir(self, x, y, z):
+        lookDir = glm.vec3(x, y, z)
+        self.lookAtPos = self.position + lookDir
+        self.setViewUniform()
+
     def rotate(self, x, y):
         x_factor = 90.0
         y_factor = 90.0
@@ -89,9 +105,9 @@ class Camera:
         rot_y = glm.rotate(glm.identity(glm.mat4), y_angle, y_rot_axis)
 
         rot = rot_x * rot_y
-        posDir = glm.vec4(self.position - self.lookAt, 0.0)
+        posDir = glm.vec4(self.position - self.lookAtPos, 0.0)
         posDirRotated = rot * posDir
-        self.position = self.lookAt + glm.vec3(posDirRotated)
+        self.position = self.lookAtPos + glm.vec3(posDirRotated)
 
         self.setViewUniform()
 
@@ -103,7 +119,7 @@ class Camera:
         delta = -amt * (x * cameraRight + y * cameraUp)
 
         self.position += delta
-        self.lookAt += delta
+        self.lookAtPos += delta
 
         self.setViewUniform()
 
