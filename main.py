@@ -20,6 +20,7 @@ from camera_controls import CameraControls
 import multiprocessing.connection as mpc
 import time
 import threading
+import imgui
 
 
 class App:
@@ -49,6 +50,7 @@ class App:
             "./assets/instrument1.obj", self.obj_shader
         )
         self.instrument_obj.uploadMeshData()
+        self.instrument_obj.moveTo(0, 1.0, -0.2)
 
         self.stereoCamActive = False
 
@@ -66,7 +68,7 @@ class App:
         self.stereoCamL.moveTo(0.29, 1.7128, -2)
         self.stereoCamR.moveTo(-0.29, 1.7128, -2)
 
-        stereoCamPose = (0, -0.5, 1)
+        stereoCamPose = (0, -0.7, 1)
         self.stereoCamL.lookDir(*stereoCamPose)
         self.stereoCamR.lookDir(*stereoCamPose)
 
@@ -77,13 +79,17 @@ class App:
         gl.glEnable(gl.GL_DEPTH_TEST)
         gl.glEnable(gl.GL_FRAMEBUFFER_SRGB)
 
+        fb_zoom = 2
+        self.fb_width = 480 * 2 * fb_zoom
+        self.fb_height = 480 * fb_zoom
+
         self.rb = gl.glGenRenderbuffers(1)  # type: ignore
         gl.glBindRenderbuffer(gl.GL_RENDERBUFFER, self.rb)
         gl.glRenderbufferStorage(
             gl.GL_RENDERBUFFER,
             gl.GL_RGB8,
-            self.window.width() * 2,
-            self.window.height(),
+            self.fb_width,
+            self.fb_height,
         )
         gl.glBindRenderbuffer(gl.GL_RENDERBUFFER, 0)
 
@@ -119,15 +125,15 @@ class App:
         if self.stereoCamActive:
             self.window.setWide(True)
 
-            gl.glViewport(0, 0, self.window.width(), self.window.height())
+            gl.glViewport(0, 0, self.window.width() // 2, self.window.height())
             self.stereoCamL.setAllUniforms()
             for obj in objectsToDraw:
                 obj.draw()
 
             gl.glViewport(
-                self.window.width(),
+                self.window.width() // 2,
                 0,
-                self.window.width(),
+                self.window.width() // 2,
                 self.window.height(),
             )
             self.stereoCamR.setAllUniforms()
@@ -140,6 +146,12 @@ class App:
             self.camera.setAllUniforms()
             for obj in objectsToDraw:
                 obj.draw()
+
+        self.drawImGui()
+
+    def drawImGui(self):
+        if imgui.begin("Hello World"):
+            imgui.end()
 
     def drawGleonsStereo(self):
         if self.connection is None:
@@ -154,16 +166,16 @@ class App:
         gl.glClear(gl.GL_COLOR_BUFFER_BIT)
         gl.glClear(gl.GL_DEPTH_BUFFER_BIT)
 
-        gl.glViewport(0, 0, self.window.width(), self.window.height())
+        gl.glViewport(0, 0, self.fb_width // 2, self.fb_height)
         self.stereoCamL.setAllUniforms()
         for obj in objectsToDraw:
             obj.draw()
 
         gl.glViewport(
-            self.window.width(),
+            self.fb_width // 2,
             0,
-            self.window.width(),
-            self.window.height(),
+            self.fb_width // 2,
+            self.fb_height,
         )
         self.stereoCamR.setAllUniforms()
         for obj in objectsToDraw:
@@ -172,21 +184,21 @@ class App:
         arr = gl.glReadPixelsf(
             0,
             0,
-            self.window.width() * 2,
-            self.window.height(),
+            self.fb_width,
+            self.fb_height,
             gl.GL_BGR,
         )
 
         # without this, a line seem to be wrapped into two lines and cause weird
         # interlacing like effects
-        arr = arr.reshape((480, 960, 3))
+        arr = arr.reshape((self.fb_height, self.fb_width, 3))
 
         # Because glReadPixels considers (0,0) as bottom-left corner
         arr = np.flip(arr, 0)
 
         try:
             self.connection.send_bytes(arr.tobytes())
-        except ConnectionResetError:
+        except (ConnectionResetError, BrokenPipeError):
             self.connection = None
             self.acceptStreamConnectionInBackground()
 

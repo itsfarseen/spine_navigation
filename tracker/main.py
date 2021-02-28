@@ -5,20 +5,27 @@ import time
 
 # client = mpc.Client("../spinevirtualcamera", 'AF_UNIX')
 client = mpc.Client(("127.0.0.1", 5001), "AF_INET")
+fb_zoom = 2
+fb_width = 480 * 2 * fb_zoom
+fb_height = 480 * fb_zoom
 
 while True:
-    arr = client.recv_bytes()
+    try:
+        arr = client.recv_bytes()
+    except EOFError:
+        print("Server disconnected")
+        break
+
     arr = np.frombuffer(
         arr,
         (
             np.float32,
             (
-                960,
+                fb_width,
                 3,
             ),
         ),
     )
-    print(arr.shape)
 
     img = np.round(arr*255).astype(np.uint8)
 
@@ -32,14 +39,13 @@ while True:
         gray,
         cv2.HOUGH_GRADIENT,
         1,
-        20,
+        30,
         param1=50,
-        param2=30,
+        param2=20,
         minRadius=0,
-        maxRadius=40,
+        maxRadius=0,
     )
 
-    # print(detected_circles)
 
     # Draw circles that are detected.
     if detected_circles is not None:
@@ -55,6 +61,7 @@ while True:
             # Draw a small circle (of radius 1) to show the center.
             cv2.circle(img, (a, b), 1, (0, 0, 255), 3)
 
+    # img = cv2.resize(img, (fb_width // fb_zoom, fb_height//fb_zoom), interpolation=cv2.INTER_AREA)
     cv2.imshow("Test", img)
     if cv2.waitKey(1) & 0xFF == ord("q"):
         break

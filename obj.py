@@ -14,6 +14,7 @@ class ObjMesh:
     def __init__(self, filename, shader):
         self._load_obj(filename)
         self.shader = shader
+        self.position = glm.vec3(0, 0, 0)
 
     def _load_mtl(self, objfilename, mtlfilename):
         objpath = Path(objfilename)
@@ -229,9 +230,16 @@ class ObjMesh:
         self.vao = vao
         gl.glBindVertexArray(0)
 
+    def moveTo(self, x, y, z):
+        self.position = glm.vec3(x, y, z)
+
     def draw(self):
         self.shader.use()
         self.shader.setMaterials(self.materials)
+        modelMatrix = glm.identity(glm.mat4)
+        modelMatrix = glm.translate(modelMatrix, self.position)
+        self.shader.setModelMatrix(modelMatrix)
+
         gl.glBindVertexArray(self.vao)
         gl.glDrawElements(
             gl.GL_TRIANGLES,

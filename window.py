@@ -1,4 +1,6 @@
 import glfw
+import imgui
+from imgui.integrations.glfw import GlfwRenderer
 
 
 class Window:
@@ -39,6 +41,11 @@ class Window:
 
         self.window = window
 
+        self.mouse_pressed = False
+
+        imgui.create_context()
+        self.imgui_impl = GlfwRenderer(self.window, attach_callbacks=False)
+
     def _adjustSize(self):
         if self.wide:
             glfw.set_window_size(
@@ -70,6 +77,11 @@ class Window:
         return (x, y)
 
     def mouse(self, window, btn, action, mods):
+        if action == glfw.PRESS:
+            self.mouse_pressed = True
+        else:
+            self.mouse_pressed = False
+
         for mousefn in self.mousefns:
             if (
                 mousefn(btn, action, mods, False, None, None)
@@ -84,18 +96,19 @@ class Window:
 
     def motion(self, window, x, y):
         warp = False
-        if x > self.width():
-            x = 0
-            warp = True
-        elif x < 0:
-            x = self.width()
-            warp = True
-        if y > self.height():
-            y = 0
-            warp = True
-        elif y < 0:
-            y = self.height()
-            warp = True
+        if self.mouse_pressed:
+            if x > self.width():
+                x = 0
+                warp = True
+            elif x < 0:
+                x = self.width()
+                warp = True
+            if y > self.height():
+                y = 0
+                warp = True
+            elif y < 0:
+                y = self.height()
+                warp = True
 
         if warp:
             glfw.set_cursor_pos(self.window, x, y)
@@ -108,13 +121,21 @@ class Window:
 
     def run(self):
         while not glfw.window_should_close(self.window):
-            self.displayfn()
-            glfw.swap_buffers(self.window)
             glfw.poll_events()
+            self.imgui_impl.process_inputs()
+            imgui.new_frame()
+            (self.displayfn)()
+            imgui.render()
+            self.imgui_impl.render(imgui.get_draw_data())
+            glfw.swap_buffers(self.window)
+        self.imgui_impl.shutdown()
         glfw.terminate()
 
     def width(self):
-        return self.WIN_WIDTH
+        if self.wide:
+            return self.WIN_WIDTH * 2
+        else:
+            return self.WIN_WIDTH
 
     def height(self):
         return self.WIN_HEIGHT
