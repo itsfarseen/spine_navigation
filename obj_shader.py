@@ -38,6 +38,9 @@ class ObjShader(Shader):
             vec3 Ks;
         };
         uniform Material[5] materials;
+
+        uniform int renderMaterialOnly = -1;
+
         in vec2 f_uv;
         in vec3 f_normal;
         in vec3 f_pos;
@@ -52,6 +55,15 @@ class ObjShader(Shader):
         vec3 x = 0.001*vec3(f_uv, 1.0);
 
         void main() {
+            if(renderMaterialOnly >= 0) {
+                if(renderMaterialOnly == f_material) {
+                    gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+                } else {
+                    gl_FragColor = vec4(1.0, 1.0, 1.0, 0.0);
+                }
+                return;
+            }
+
             vec3 norm = normalize(f_normal);
             vec3 lightDir = normalize(light - f_pos);
             float diff = max(dot(norm, lightDir), 0.0);
@@ -84,9 +96,7 @@ class ObjShader(Shader):
         return self._getAttribLocation("position")
 
     def getUVAttribLoc(self):
-        a = self._getAttribLocation("uv_coord")
-        assert a != -1
-        return a
+        return self._getAttribLocation("uv_coord")
 
     def getNormalAttribLoc(self):
         return self._getAttribLocation("normal")
@@ -101,3 +111,6 @@ class ObjShader(Shader):
             self._setVec3(matUni + ".Ka", material.Ka)
             self._setVec3(matUni + ".Kd", material.Kd)
             self._setVec3(matUni + ".Ks", material.Ks)
+
+    def renderMaterialOnly(self, materialIdx):
+        self._setInt("renderMaterialOnly", materialIdx)

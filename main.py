@@ -27,12 +27,20 @@ def setup():
 
 
 def display():
-    gl.glClearColor(0.3, 0.4, 0.38, 1.0)
-    gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)  # type: ignore
+    if renderGleonsOnly:
+        gl.glClearColor(0.0, 0.0, 0.0, 1.0)
+        gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)  # type: ignore
+        obj_shader.renderMaterialOnly(1)
+        instrument_obj.draw()
 
-    instrument_obj.draw()
-    # operating_table_obj.draw()
-    grid.draw()
+    else:
+        gl.glClearColor(0.3, 0.4, 0.38, 1.0)
+        gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)  # type: ignore
+
+        obj_shader.renderMaterialOnly(-1)
+        instrument_obj.draw()
+        operating_table_obj.draw()
+        grid.draw()
 
 
 last_x = None
@@ -76,6 +84,15 @@ def mouse(btn, action, mods, warp, x, y):
     last_y = y
 
 
+renderGleonsOnly = False
+
+
+def keyboard(key, action, mods):
+    global renderGleonsOnly
+    if key == glfw.KEY_TAB and action == glfw.PRESS:
+        renderGleonsOnly = not renderGleonsOnly
+
+
 cube_shader = SimpleShader()
 cube = CubeMesh(cube_shader)
 
@@ -86,7 +103,7 @@ obj_shader = ObjShader()
 operating_table_obj = ObjMesh("./assets/OperatingTable.obj", obj_shader)
 instrument_obj = ObjMesh("./assets/instrument1.obj", obj_shader)
 
-window = Window(display, mousefn=mouse, scrollfn=scroll)
+window = Window(display, mousefn=mouse, scrollfn=scroll, keyboardfn=keyboard)
 camera = Camera(window, [cube_shader, grid_shader, obj_shader])
 
 

@@ -53,6 +53,12 @@ class Shader:
         assert loc != -1, name
         gl.glUniform1f(loc, val)
 
+    def _setInt(self, name, val):
+        self.use()
+        loc = self._getUniformLocation(name)
+        assert loc != -1, name
+        gl.glUniform1i(loc, val)
+
     def _setVec3(self, name, val):
         self.use()
         loc = self._getUniformLocation(name)
