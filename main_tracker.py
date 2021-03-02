@@ -1,4 +1,3 @@
-import multiprocessing.connection as mpc
 import cv2
 import numpy as np
 import time
@@ -7,168 +6,34 @@ from pprint import pprint
 import glm
 import time
 import params
-from utils import centroid, findRotMat, dist2
+from tracker import Tracker, full_img_width, full_img_height, fb_zoom
+from time import sleep
 
 
-def getImg():
-    global client
-    if client == None:
-        client = mpc.Client(("127.0.0.1", 5001), "AF_INET")
-
-    try:
-        arr = client.recv_bytes()
-    except EOFError:
-        print("Server disconnected")
-        exit(-1)
-    arr = np.frombuffer(
-        arr,
-        (
-            np.float32,
-            (
-                full_img_width,
-                3,
-            ),
-        ),
-    )
-
-    img = np.round(arr * 255).astype(np.uint8)
-    return img
-
-
-client = None
-
-fb_zoom = params.FB_ZOOM
-cam_fov = radians(params.CAM_FOV_DEGREES)
-img_width = params.CAM_SENSOR_WIDTH * fb_zoom
-img_height = params.CAM_SENSOR_HEIGHT * fb_zoom
-full_img_width = img_width * 2
-print(full_img_width)
-full_img_height = img_height
-
-camXDelta = params.CAM_X_DELTA
-camY = params.CAM_Y
-camZ = params.CAM_Z
-
-camPoseOrig = glm.vec3(0, 0, 1)
-camPose = glm.vec3(*params.CAM_POSE)
-camRotMat = findRotMat(camPoseOrig, camPose)
-
-focalLength = img_width / (2 * tan(cam_fov / 2))
-print("Focal Length", focalLength)
-updateRate = 4
-_updateRateI = 0
+tracker = Tracker()
 
 while True:
-    _updateRateI += 1
-    if _updateRateI < updateRate:
-        continue
-    _updateRateI = 0
-
-    img = getImg()
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-    # Blur using 3 * 3 kernel.
-    # gray = cv2.blur(gray, (1, 1))
-    gray = cv2.GaussianBlur(gray, (3, 3), 2)
-
-    # Apply Hough transform on the blurred image.
-    detected_circles = cv2.HoughCircles(
-        gray,
-        cv2.HOUGH_GRADIENT,
-        1,
-        30,
-        param1=50,
-        param2=20,
-        minRadius=4,
-        maxRadius=50,
-    )
-
-    circlesL = []
-    circlesR = []
-
-    # Draw circles that are detected.
-    if detected_circles is not None:
-        for pt in detected_circles[0, :]:
-            a, b, r = pt[0], pt[1], pt[2]
-            # print(pt)
-
-            x, y = a, b
-            isRight = False
-            if x > img_width:
-                x -= img_width
-                isRight = True
-
-            # make (0,0) origin and flip y axis
-            x = x - (img_width / 2)
-            y = (img_height / 2) - y
-
-            if isRight:
-                circlesR.append((x, y))
-            else:
-                circlesL.append((x, y))
-
-            # Convert the circle parameters a, b and r to integers.
-            (a, b, r) = np.uint16(np.around((a, b, r)))
-            # Draw the circumference of the circle.
-            cv2.circle(img, (a, b), r, (0, 255, 0), 2)
-
-            # Draw a small circle (of radius 1) to show the center.
-            cv2.circle(img, (a, b), 1, (0, 0, 255), 3)
-
-        circlesLC = centroid(circlesL)
-        circlesRC = centroid(circlesL)
-
-        def key1(p, c):
-            q = p[0] - c[0], p[1] - c[1]
-            return atan2(q[1], q[0])
-
-        # sort by y coordinate to find corresponding points
-        circlesL.sort(key=lambda p: key1(p, circlesLC))
-        circlesR.sort(key=lambda p: key1(p, circlesRC))
-
-        points = []
-
-        for i, (pL, pR) in enumerate(zip(circlesL, circlesR)):
-            xDiff = abs(pL[0] - pR[0])
-            x = camXDelta * (pL[0] + pR[0]) / (2 * xDiff)
-            y = camXDelta * (pL[1]) / xDiff
-            z = camXDelta * focalLength / xDiff
-
-            vec = glm.vec4(x, y, z, 0)
-            vec = camRotMat * vec
-            points.append((vec.x, vec.y + camY, vec.z + camZ))
-
-        # printPoints(points)
-
-        if len(points) == 3:
-            c = centroid(points)
-            # print("Centroid", c)
-
-            dists = [dist2(p, c) for p in points]
-            points_dists = list(zip(points, dists))
-
-            def key2(e):
-                p, dist = e
-                return dist
-
-            points_dists.sort(key=key2)
-            top, _ = points_dists[0]
-            a, b = points_dists[1][0], points_dists[2][0]
-            m = centroid([a, b])
-
-            m = glm.vec3(*m)
-            top = glm.vec3(*top)
-            instrVec = glm.normalize(top - m)
-            instrVecOrig = glm.vec3(0, 0, 1)
-            print(instrVec)
 
     # rotMatObj = findRotMat(instrVecOrig, instrVec)
+    instrPos, instrDir = tracker.getInstrCoords()
+    if (img := tracker.last_img) is not None:
+        img = cv2.resize(
+            img,
+            (full_img_width // fb_zoom, full_img_height // fb_zoom),
+            interpolation=cv2.INTER_AREA,
+        )
+        cv2.imshow("Test", img)
+        if instrPos is None:
+            print("Instrument not detected")
+        else:
+            print("Pos", instrPos)
+            print("Dir", instrDir)
+    else:
+        if not tracker._isConnected():
+            print("Waiting for connection")
+        else:
+            print("Waiting for image")
+        sleep(1)
 
-    img = cv2.resize(
-        img,
-        (full_img_width // fb_zoom, full_img_height // fb_zoom),
-        interpolation=cv2.INTER_AREA,
-    )
-    cv2.imshow("Test", img)
     if cv2.waitKey(1) & 0xFF == ord("q"):
         break
