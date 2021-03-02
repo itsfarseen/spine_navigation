@@ -1,13 +1,11 @@
 from obj_shader import ObjShader
 from obj import ObjMesh
 import OpenGL.GL as gl
-import nibabel as nib
 import glm
 import numpy as np
 import ctypes
 import matplotlib.pyplot as plt
 from voxels import sphere
-import pywavefront
 from simple_shader import SimpleShader
 from window import Window
 from cube import CubeMesh
@@ -50,7 +48,8 @@ class App:
             "./assets/instrument1.obj", self.obj_shader
         )
         self.instrument_obj.uploadMeshData()
-        self.instrument_obj.moveTo(0, 1.0, -0.2)
+        self.instrument_pos = [0, 1.0, -0.2]
+        self.instrument_obj.moveTo(*self.instrument_pos)
 
         self.stereoCamActive = False
 
@@ -150,7 +149,30 @@ class App:
         self.drawImGui()
 
     def drawImGui(self):
-        if imgui.begin("Hello World"):
+        if imgui.begin("Instrument Controls"):
+            imgui.text("Position")
+            any_changed = False
+            changed, value = imgui.input_float(
+                "X", self.instrument_pos[0], step=0.1
+            )
+            if changed:
+                self.instrument_pos[0] = value
+                any_changed = True
+            changed, value = imgui.input_float(
+                "Y", self.instrument_pos[1], step=0.1
+            )
+            if changed:
+                self.instrument_pos[1] = value
+                any_changed = True
+            changed, value = imgui.input_float(
+                "Z", self.instrument_pos[2], step=0.1
+            )
+            if changed:
+                self.instrument_pos[2] = value
+                any_changed = True
+            if any_changed:
+                self.instrument_obj.moveTo(*self.instrument_pos)
+
             imgui.end()
 
     def drawGleonsStereo(self):

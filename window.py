@@ -45,6 +45,7 @@ class Window:
 
         imgui.create_context()
         self.imgui_impl = GlfwRenderer(self.window, attach_callbacks=False)
+        glfw.set_char_callback(self.window, self.imgui_impl.char_callback)
 
     def _adjustSize(self):
         if self.wide:
@@ -55,9 +56,18 @@ class Window:
             glfw.set_window_size(self.window, self.WIN_WIDTH, self.WIN_HEIGHT)
 
     def reshape(self, window, width, height):
+        # Note: When changing from fixed size to resizeable,
+        # uncomment the following line
+        # self.imgui_impl.resize_callback(window, width, height)
         self._adjustSize()
 
     def keyboard(self, window, key, scancode, action, mods):
+        if imgui.get_io().want_capture_keyboard:
+            self.imgui_impl.keyboard_callback(
+                window, key, scancode, action, mods
+            )
+            return
+
         if key == glfw.KEY_ESCAPE:
             glfw.set_window_should_close(window, glfw.TRUE)
             return
@@ -77,6 +87,10 @@ class Window:
         return (x, y)
 
     def mouse(self, window, btn, action, mods):
+        if imgui.get_io().want_capture_mouse:
+            # currently imgui_glfw handles mouse in process_inputs()
+            return
+
         if action == glfw.PRESS:
             self.mouse_pressed = True
         else:
@@ -90,11 +104,19 @@ class Window:
                 break
 
     def scroll(self, window, x, y):
+        if imgui.get_io().want_capture_mouse:
+            self.imgui_impl.scroll_callback(window, x, y)
+            return
+
         for scrollfn in self.scrollfns:
             if scrollfn(x, y) == Window.EVENT_CONSUMED:
                 break
 
     def motion(self, window, x, y):
+        if imgui.get_io().want_capture_mouse:
+            # currently imgui_glfw handles mouse in process_inputs()
+            return
+
         warp = False
         if self.mouse_pressed:
             if x > self.width():
@@ -121,9 +143,9 @@ class Window:
 
     def run(self):
         while not glfw.window_should_close(self.window):
+            imgui.new_frame()
             glfw.poll_events()
             self.imgui_impl.process_inputs()
-            imgui.new_frame()
             (self.displayfn)()
             imgui.render()
             self.imgui_impl.render(imgui.get_draw_data())
