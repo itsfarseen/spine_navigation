@@ -19,6 +19,8 @@ import multiprocessing.connection as mpc
 import time
 import threading
 import imgui
+import select
+import queue
 
 
 class App:
@@ -26,6 +28,7 @@ class App:
         self.listener = mpc.Listener(("127.0.0.1", 5001), "AF_INET")
         self.connection = None
         self.connectionThread = None
+        self.connectionDataQueue = queue.Queue(maxsize=1)
         self.acceptStreamConnectionInBackground()
 
         self.window = Window(self.display)
@@ -49,7 +52,11 @@ class App:
         )
         self.instrument_obj.uploadMeshData()
         self.instrument_pos = [0, 1.0, -0.2]
+        self.instrument_rot = [0, 0, 0]
         self.instrument_obj.moveTo(*self.instrument_pos)
+        self.instrument_obj.setRotationX(self.instrument_rot[0])
+        self.instrument_obj.setRotationY(self.instrument_rot[1])
+        self.instrument_obj.setRotationZ(self.instrument_rot[2])
 
         self.stereoCamActive = False
 
@@ -78,7 +85,7 @@ class App:
         gl.glEnable(gl.GL_DEPTH_TEST)
         gl.glEnable(gl.GL_FRAMEBUFFER_SRGB)
 
-        fb_zoom = 2
+        fb_zoom = 5
         self.fb_width = 480 * 2 * fb_zoom
         self.fb_height = 480 * fb_zoom
 
@@ -150,35 +157,56 @@ class App:
 
     def drawImGui(self):
         if imgui.begin("Instrument Controls"):
+
             imgui.text("Position")
+
             any_changed = False
-            changed, value = imgui.input_float(
+            changed, self.instrument_pos[0] = imgui.input_float(
                 "X", self.instrument_pos[0], step=0.1
             )
-            if changed:
-                self.instrument_pos[0] = value
-                any_changed = True
-            changed, value = imgui.input_float(
+            any_changed = changed or any_changed
+
+            changed, self.instrument_pos[1] = imgui.input_float(
                 "Y", self.instrument_pos[1], step=0.1
             )
-            if changed:
-                self.instrument_pos[1] = value
-                any_changed = True
-            changed, value = imgui.input_float(
+            any_changed = changed or any_changed
+
+            changed, self.instrument_pos[2] = imgui.input_float(
                 "Z", self.instrument_pos[2], step=0.1
             )
-            if changed:
-                self.instrument_pos[2] = value
-                any_changed = True
+            any_changed = changed or any_changed
+
             if any_changed:
                 self.instrument_obj.moveTo(*self.instrument_pos)
+
+            imgui.text("Rotation")
+
+            changed, self.instrument_rot[0] = imgui.input_float(
+                "X Rot", self.instrument_rot[0], step=1
+            )
+            if changed:
+                self.instrument_obj.setRotationX(self.instrument_rot[0])
+
+            changed, self.instrument_rot[1] = imgui.input_float(
+                "Y Rot", self.instrument_rot[1], step=1
+            )
+            if changed:
+                self.instrument_obj.setRotationY(self.instrument_rot[1])
+
+            changed, self.instrument_rot[2] = imgui.input_float(
+                "Z Rot", self.instrument_rot[2], step=1
+            )
+            if changed:
+                self.instrument_obj.setRotationZ(self.instrument_rot[2])
+
+            m = self.instrument_obj.getRotationMat()
+            v = glm.vec4(0, 0, 1, 0)
+            v = m * v
+            imgui.text("X {:.3f} Y {:.3f} Z {:.3f}".format(v.x, v.y, v.z))
 
             imgui.end()
 
     def drawGleonsStereo(self):
-        if self.connection is None:
-            return
-
         gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, self.fb)
 
         gl.glClearColor(0.0, 0.0, 0.0, 1.0)
@@ -218,20 +246,27 @@ class App:
         # Because glReadPixels considers (0,0) as bottom-left corner
         arr = np.flip(arr, 0)
 
-        try:
-            self.connection.send_bytes(arr.tobytes())
-        except (ConnectionResetError, BrokenPipeError):
-            self.connection = None
-            self.acceptStreamConnectionInBackground()
-
         gl.glBindFramebuffer(gl.GL_FRAMEBUFFER, 0)
+
+        if self.connectionDataQueue.full():
+            return
+
+        self.connectionDataQueue.put_nowait(arr)
 
     def acceptStreamConnectionInBackground(self):
         if self.connection is not None:
             return
 
         def start():
-            self.connection = self.listener.accept()
+            while True:
+                self.connection = self.listener.accept()
+                while True:
+                    arr = self.connectionDataQueue.get()
+                    try:
+                        self.connection.send_bytes(arr.tobytes())
+                    except (ConnectionResetError, BrokenPipeError):
+                        self.connection = None
+                        break
 
         self.connectionThread = threading.Thread(target=start, daemon=True)
         self.connectionThread.start()

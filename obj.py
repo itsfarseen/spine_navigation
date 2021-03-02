@@ -15,6 +15,9 @@ class ObjMesh:
         self._load_obj(filename)
         self.shader = shader
         self.position = glm.vec3(0, 0, 0)
+        self.rotationX = 0
+        self.rotationY = 0
+        self.rotationZ = 0
 
     def _load_mtl(self, objfilename, mtlfilename):
         objpath = Path(objfilename)
@@ -233,12 +236,34 @@ class ObjMesh:
     def moveTo(self, x, y, z):
         self.position = glm.vec3(x, y, z)
 
+    def setRotationX(self, val):
+        self.rotationX = val
+
+    def setRotationY(self, val):
+        self.rotationY = val
+
+    def setRotationZ(self, val):
+        self.rotationZ = val
+
+    def getRotationMat(self):
+        mat = glm.identity(glm.mat4)
+        mat = glm.rotate(mat, glm.radians(self.rotationX), glm.vec3(1, 0, 0))
+        mat = glm.rotate(mat, glm.radians(self.rotationY), glm.vec3(0, 1, 0))
+        mat = glm.rotate(mat, glm.radians(self.rotationZ), glm.vec3(0, 0, 1))
+        return mat
+
+    def getTranslationMat(self):
+        mat = glm.identity(glm.mat4)
+        mat = glm.translate(mat, self.position)
+        return mat
+
     def draw(self):
         self.shader.use()
         self.shader.setMaterials(self.materials)
-        modelMatrix = glm.identity(glm.mat4)
-        modelMatrix = glm.translate(modelMatrix, self.position)
-        self.shader.setModelMatrix(modelMatrix)
+        matT = self.getTranslationMat()
+        matR = self.getRotationMat()
+        modelMat = matT * matR
+        self.shader.setModelMatrix(modelMat)
 
         gl.glBindVertexArray(self.vao)
         gl.glDrawElements(

@@ -62,10 +62,9 @@ class Window:
         self._adjustSize()
 
     def keyboard(self, window, key, scancode, action, mods):
+        self.imgui_impl.keyboard_callback(window, key, scancode, action, mods)
+
         if imgui.get_io().want_capture_keyboard:
-            self.imgui_impl.keyboard_callback(
-                window, key, scancode, action, mods
-            )
             return
 
         if key == glfw.KEY_ESCAPE:
@@ -104,8 +103,9 @@ class Window:
                 break
 
     def scroll(self, window, x, y):
+        self.imgui_impl.scroll_callback(window, x, y)
+
         if imgui.get_io().want_capture_mouse:
-            self.imgui_impl.scroll_callback(window, x, y)
             return
 
         for scrollfn in self.scrollfns:
@@ -143,9 +143,9 @@ class Window:
 
     def run(self):
         while not glfw.window_should_close(self.window):
-            imgui.new_frame()
             glfw.poll_events()
             self.imgui_impl.process_inputs()
+            imgui.new_frame()
             (self.displayfn)()
             imgui.render()
             self.imgui_impl.render(imgui.get_draw_data())
