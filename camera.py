@@ -9,6 +9,7 @@ class Camera:
 
         self.position = glm.vec3(0.0, 5.0, 5.0)
         self.lookAtPos = glm.vec3(0.0, 0.0, 0.0)
+        self.fov_degrees = 45.0
 
         self._vecCache = {}
 
@@ -49,7 +50,7 @@ class Camera:
 
     def setProjectionUniform(self):
         proj = glm.perspective(
-            glm.radians(45.0), self.window.aspect(), 0.1, 100.0
+            glm.radians(self.fov_degrees), self.window.aspect(), 0.1, 100.0
         )
         if isinstance(self.shader, list):
             for shader in self.shader:
