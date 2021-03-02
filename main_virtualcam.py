@@ -31,7 +31,7 @@ class App:
         self.connectionDataQueue = queue.Queue(maxsize=1)
         self.acceptStreamConnectionInBackground()
 
-        self.window = Window(self.display)
+        self.window = Window("Virtual Stereo Camera", self.display)
         # context has to be initialized before any function touches opengl
         self.window.setupContext()
         self.window.addKeyboardHandler(self.keyboard)

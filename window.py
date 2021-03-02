@@ -10,8 +10,9 @@ class Window:
     WIN_HEIGHT = 480
     WIN_ASPECT = WIN_WIDTH / WIN_HEIGHT
 
-    def __init__(self, displayfn):
+    def __init__(self, title, displayfn):
         self.window = None
+        self.title = title
         self.displayfn = displayfn
         self.keyboardfns = []
         self.mousefns = []
@@ -30,7 +31,7 @@ class Window:
         glfw.window_hint(glfw.RESIZABLE, glfw.FALSE)
 
         window = glfw.create_window(
-            self.WIN_WIDTH, self.WIN_HEIGHT, "Hello World [Float]", None, None
+            self.WIN_WIDTH, self.WIN_HEIGHT, self.title + " [Float]", None, None
         )
         glfw.set_window_size_callback(window, self.reshape)
         glfw.set_mouse_button_callback(window, self.mouse)
