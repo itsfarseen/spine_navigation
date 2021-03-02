@@ -21,6 +21,7 @@ import threading
 import imgui
 import select
 import queue
+import params
 
 
 class App:
@@ -71,10 +72,14 @@ class App:
             self.window, [self.grid_shader, self.obj_shader]
         )
 
-        self.stereoCamL.moveTo(0.29, 1.7128, -2)
-        self.stereoCamR.moveTo(-0.29, 1.7128, -2)
+        self.stereoCamL.moveTo(
+            params.CAM_X_DELTA / 2, params.CAM_Y, params.CAM_Z
+        )
+        self.stereoCamR.moveTo(
+            -params.CAM_X_DELTA / 2, params.CAM_Y, params.CAM_Z
+        )
 
-        stereoCamPose = (0, -0.7, 1)
+        stereoCamPose = params.CAM_POSE
         self.stereoCamL.lookDir(*stereoCamPose)
         self.stereoCamR.lookDir(*stereoCamPose)
 

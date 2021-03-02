@@ -6,21 +6,7 @@ from math import sqrt, tan, radians, asin, atan2
 from pprint import pprint
 import glm
 import time
-
-# client = mpc.Client("../spinevirtualcamera", 'AF_UNIX')
-client = None
-
-
-fb_zoom = 2
-cam_fov = radians(45.0)
-cam_width = 480 * fb_zoom
-cam_height = 480 * fb_zoom
-fb_width = cam_width * 2
-fb_height = cam_height
-
-camXDelta = 0.58
-camY = 1.7128
-camZ = -2
+import params
 
 
 def dist2(a, b):
@@ -56,7 +42,7 @@ def getImg():
         (
             np.float32,
             (
-                fb_width,
+                full_img_width,
                 3,
             ),
         ),
@@ -83,13 +69,27 @@ def printPoints(a):
         print(i, "{:.3f} {:.3f} {:.3f}".format(*p))
 
 
+client = None
+
+fb_zoom = params.FB_ZOOM
+cam_fov = radians(params.CAM_FOV_DEGREES)
+img_width = params.CAM_SENSOR_WIDTH * fb_zoom
+img_height = params.CAM_SENSOR_HEIGHT * fb_zoom
+full_img_width = img_width * 2
+print(full_img_width)
+full_img_height = img_height
+
+camXDelta = params.CAM_X_DELTA
+camY = params.CAM_Y
+camZ = params.CAM_Z
+
 camPoseOrig = glm.vec3(0, 0, 1)
-camPose = glm.vec3(0, -0.7, 1)
+camPose = glm.vec3(*params.CAM_POSE)
 camRotMat = findRotMat(camPoseOrig, camPose)
 
-focalLength = cam_width / (2 * tan(cam_fov / 2))
+focalLength = img_width / (2 * tan(cam_fov / 2))
 print("Focal Length", focalLength)
-updateRate = 2
+updateRate = 4
 _updateRateI = 0
 
 while True:
@@ -128,13 +128,13 @@ while True:
 
             x, y = a, b
             isRight = False
-            if x > cam_width:
-                x -= cam_width
+            if x > img_width:
+                x -= img_width
                 isRight = True
 
             # make (0,0) origin and flip y axis
-            x = x - (cam_width / 2)
-            y = (cam_height / 2) - y
+            x = x - (img_width / 2)
+            y = (img_height / 2) - y
 
             if isRight:
                 circlesR.append((x, y))
@@ -200,7 +200,7 @@ while True:
 
     img = cv2.resize(
         img,
-        (fb_width // fb_zoom, fb_height // fb_zoom),
+        (full_img_width // fb_zoom, full_img_height // fb_zoom),
         interpolation=cv2.INTER_AREA,
     )
     cv2.imshow("Test", img)
