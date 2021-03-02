@@ -8,6 +8,7 @@ set foldmethod=indent
 set foldlevel=1
 
 nnoremap <F5> :!python main.py<CR>
+nnoremap <F7> :!python %<CR>
 
 au BufWrite *.py :Autoformat
 au BufWrite *.exrc :Autoformat

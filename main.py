@@ -85,7 +85,7 @@ class App:
         gl.glEnable(gl.GL_DEPTH_TEST)
         gl.glEnable(gl.GL_FRAMEBUFFER_SRGB)
 
-        fb_zoom = 5
+        fb_zoom = 2
         self.fb_width = 480 * 2 * fb_zoom
         self.fb_height = 480 * fb_zoom
 
