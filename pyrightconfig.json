@@ -1,4 +1,4 @@
 {
-    "reportMissingTypeStubs": false,
-    "reportGeneralTypeIssues": false
+    "useLibraryCodeForTypes": false,
+    "reportGeneralTypeIssues": true
 }
