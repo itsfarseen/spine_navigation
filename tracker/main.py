@@ -26,9 +26,9 @@ sinTheta = glm.length(glm.cross(camPoseOrig, camPose))
 theta = glm.asin(sinTheta)
 
 rotMat4 = glm.identity(glm.mat4)
-rotMat4 = glm.rotate(rotMat4, theta, glm.vec3(1,0,0))
+rotMat4 = glm.rotate(rotMat4, theta, glm.vec3(1, 0, 0))
 
-focalLength = (cam_width/2)/tan(cam_fov/2)
+focalLength = (cam_width / 2) / tan(cam_fov / 2)
 
 while True:
     try:
@@ -48,7 +48,7 @@ while True:
         ),
     )
 
-    img = np.round(arr*255).astype(np.uint8)
+    img = np.round(arr * 255).astype(np.uint8)
 
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
@@ -91,13 +91,13 @@ while True:
                 isRight = True
 
             # make (0,0) origin and flip y axis
-            x = x - (cam_width/2)
-            y = (cam_height/2) - y
+            x = x - (cam_width / 2)
+            y = (cam_height / 2) - y
 
             if isRight:
-                circlesR.append((x,y))
+                circlesR.append((x, y))
             else:
-                circlesL.append((x,y))
+                circlesL.append((x, y))
 
     # sort by y coordinate to find corresponding points
     circlesL.sort(key=lambda p: p[1])
@@ -105,19 +105,28 @@ while True:
 
     points = []
     for pL, pR in zip(circlesL, circlesR):
-        xDiff = abs(pL[0]-pR[0])
-        z = camXDelta*focalLength/xDiff
+        xDiff = abs(pL[0] - pR[0])
+        z = camXDelta * focalLength / xDiff
 
-        x = z*pL[0]/focalLength
-        y = z*pL[1]/focalLength
+        x = z * pL[0] / focalLength
+        y = z * pL[1] / focalLength
 
-        vec = glm.vec4(x,y,z, 0)
-        vec = rotMat4*vec
-        points.append((vec.x - camXDelta/2,vec.y + camY,vec.z + camZ))
+        vec = glm.vec4(x, y, z, 0)
+        vec = rotMat4 * vec
+        points.append((vec.x - camXDelta / 2, vec.y + camY, vec.z + camZ))
 
-    pprint(points)
+    if len(points) == 3:
+        p1, p2, p3 = points
+        x = (p1[0] + p2[0] + p3[0]) / 3
+        y = (p1[1] + p2[1] + p3[1]) / 3
+        z = (p1[2] + p2[2] + p3[2]) / 3
+        print((x, y, z))
 
-    img = cv2.resize(img, (fb_width // fb_zoom, fb_height//fb_zoom), interpolation=cv2.INTER_AREA)
+    img = cv2.resize(
+        img,
+        (fb_width // fb_zoom, fb_height // fb_zoom),
+        interpolation=cv2.INTER_AREA,
+    )
     cv2.imshow("Test", img)
     if cv2.waitKey(1) & 0xFF == ord("q"):
         break
