@@ -61,16 +61,12 @@ class App:
 
         self.stereoCamActive = False
 
-        self.camera = Camera(self.window, [self.grid_shader, self.obj_shader])
+        self.camera = Camera(1.0, [self.grid_shader, self.obj_shader])
         self.cameraControls = CameraControls(self.camera)
         self.cameraControls.installHandlers(self.window)
 
-        self.stereoCamL = Camera(
-            self.window, [self.grid_shader, self.obj_shader]
-        )
-        self.stereoCamR = Camera(
-            self.window, [self.grid_shader, self.obj_shader]
-        )
+        self.stereoCamL = Camera(1.0, [self.grid_shader, self.obj_shader])
+        self.stereoCamR = Camera(1.0, [self.grid_shader, self.obj_shader])
 
         self.stereoCamL.moveTo(
             params.CAM_X_DELTA / 2, params.CAM_Y, params.CAM_Z

@@ -1,15 +1,16 @@
+from params import CAM_FOV_DEGREES
 import glm
 import OpenGL.GL as gl
 
 
 class Camera:
-    def __init__(self, window, shader):
+    def __init__(self, aspect, shader):
         self.shader = shader
-        self.window = window
+        self.aspect = float(aspect)
 
         self.position = glm.vec3(0.0, 5.0, 5.0)
         self.lookAtPos = glm.vec3(0.0, 0.0, 0.0)
-        self.fov_degrees = 45.0
+        self.fov_degrees = CAM_FOV_DEGREES
 
         self._vecCache = {}
 
@@ -50,7 +51,7 @@ class Camera:
 
     def setProjectionUniform(self):
         proj = glm.perspective(
-            glm.radians(self.fov_degrees), self.window.aspect(), 0.1, 100.0
+            glm.radians(self.fov_degrees), self.aspect, 0.1, 100.0
         )
         if isinstance(self.shader, list):
             for shader in self.shader:

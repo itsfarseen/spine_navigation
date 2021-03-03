@@ -17,17 +17,28 @@ class Window:
         self.keyboardfns = []
         self.mousefns = []
         self.scrollfns = []
-        self.wide = False
+        self.mode = "SINGLE"
 
     def setWide(self, val):
-        self.wide = val
+        if val:
+            self.mode = "WIDE"
+        else:
+            self.mode = "SINGLE"
+        self._adjustSize()
+
+    def setQuad(self, val):
+        if val:
+            self.mode = "QUAD"
+        else:
+            self.mode = "SINGLE"
         self._adjustSize()
 
     def setupContext(self):
         glfw.init()
         glfw.window_hint(glfw.CONTEXT_VERSION_MAJOR, 3)
-        glfw.window_hint(glfw.CONTEXT_VERSION_MINOR, 3)
-        glfw.window_hint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
+        glfw.window_hint(glfw.CONTEXT_VERSION_MINOR, 0)
+        glfw.window_hint(glfw.OPENGL_FORWARD_COMPAT, glfw.TRUE)
+        # glfw.window_hint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
         glfw.window_hint(glfw.RESIZABLE, glfw.FALSE)
 
         window = glfw.create_window(
@@ -49,9 +60,13 @@ class Window:
         glfw.set_char_callback(self.window, self.imgui_impl.char_callback)
 
     def _adjustSize(self):
-        if self.wide:
+        if self.mode == "WIDE":
             glfw.set_window_size(
                 self.window, self.WIN_WIDTH * 2, self.WIN_HEIGHT
+            )
+        elif self.mode == "QUAD":
+            glfw.set_window_size(
+                self.window, self.WIN_WIDTH * 2, self.WIN_HEIGHT * 2
             )
         else:
             glfw.set_window_size(self.window, self.WIN_WIDTH, self.WIN_HEIGHT)
@@ -155,13 +170,16 @@ class Window:
         glfw.terminate()
 
     def width(self):
-        if self.wide:
+        if self.mode in ["WIDE", "QUAD"]:
             return self.WIN_WIDTH * 2
         else:
             return self.WIN_WIDTH
 
     def height(self):
-        return self.WIN_HEIGHT
+        if self.mode in ["QUAD"]:
+            return self.WIN_HEIGHT * 2
+        else:
+            return self.WIN_HEIGHT
 
     def aspect(self):
         return self.WIN_ASPECT

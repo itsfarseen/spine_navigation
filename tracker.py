@@ -79,8 +79,8 @@ class Tracker:
             30,
             param1=50,
             param2=20,
-            minRadius=4,
-            maxRadius=50,
+            minRadius=0,
+            maxRadius=0,
         )
 
         # Process circles that are detected.

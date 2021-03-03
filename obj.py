@@ -18,6 +18,7 @@ class ObjMesh:
         self.rotationX = 0
         self.rotationY = 0
         self.rotationZ = 0
+        self.rotationMat = None
 
     def _load_mtl(self, objfilename, mtlfilename):
         objpath = Path(objfilename)
@@ -246,11 +247,20 @@ class ObjMesh:
         self.rotationZ = val
 
     def getRotationMat(self):
-        mat = glm.identity(glm.mat4)
-        mat = glm.rotate(mat, glm.radians(self.rotationX), glm.vec3(1, 0, 0))
-        mat = glm.rotate(mat, glm.radians(self.rotationY), glm.vec3(0, 1, 0))
-        mat = glm.rotate(mat, glm.radians(self.rotationZ), glm.vec3(0, 0, 1))
-        return mat
+        if self.rotationMat is None:
+            mat = glm.identity(glm.mat4)
+            mat = glm.rotate(
+                mat, glm.radians(self.rotationX), glm.vec3(1, 0, 0)
+            )
+            mat = glm.rotate(
+                mat, glm.radians(self.rotationY), glm.vec3(0, 1, 0)
+            )
+            mat = glm.rotate(
+                mat, glm.radians(self.rotationZ), glm.vec3(0, 0, 1)
+            )
+            return mat
+        else:
+            return self.rotationMat
 
     def getTranslationMat(self):
         mat = glm.identity(glm.mat4)
