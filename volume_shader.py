@@ -6,15 +6,18 @@ import glm
 class VolumeShader(Shader):
     def __init__(self):
         vertexCode = """#version 330 core
-        uniform mat4 model, view, projection = mat4(1.0);
+        uniform mat4 model, view, rot, projection = mat4(1.0);
 
         in vec3 position;
         out vec3 f_pos;
 
         void main() {
-            f_pos = position;
+            vec4 origin = view*vec4(0.0,0.0,0.0, 1.0);
+            
+            vec4 rv = rot*vec4(position, 1.0); 
+            f_pos = rv.xyz/rv.w;
 
-            gl_Position = projection*view*model*vec4(position, 1.0);
+            gl_Position = projection*(origin + model*vec4(position, 1.0));
         }
         """
 
@@ -28,7 +31,7 @@ class VolumeShader(Shader):
             float col = 0.0;
             col += texture(tex, vec3((f_pos.xy+5.0)/16.0, 0.5)).x;
             
-            gl_FragColor = vec4(col,0.0,0.0,col);
+            gl_FragColor = vec4(col,0.0,0.0,1.0);
         }
         """
         super().__init__(vertexCode, fragmentCode)
@@ -41,8 +44,9 @@ class VolumeShader(Shader):
     def setModelMatrix(self, mat4):
         self._setMat4("model", mat4)
 
-    def setViewMatrix(self, mat4):
-        self._setMat4("view", mat4)
+    def setViewMatrix2(self, view, rot):
+        self._setMat4("view", view)
+        self._setMat4("rot", rot)
 
     def setProjectionMatrix(self, mat4):
         self._setMat4("projection", mat4)

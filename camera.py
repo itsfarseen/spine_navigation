@@ -1,6 +1,7 @@
 from params import CAM_FOV_DEGREES
 import glm
 import OpenGL.GL as gl
+from utils import findRotMat
 
 
 class Camera:
@@ -32,43 +33,48 @@ class Camera:
     def _getCamVecs(self):
         worldUp = glm.vec3(0.0, 1.0, 0.0)
 
-        cameraPrincipal = self._fixTooSmall(
-            "principal", self.lookAtPos - self.position
-        )
+        cameraPrincipal = self._fixTooSmall("principal", self.lookAtPos - self.position)
         cameraPrincipal = glm.normalize(cameraPrincipal)
 
-        cameraRight = self._fixTooSmall(
-            "right", glm.cross(cameraPrincipal, worldUp)
-        )
+        cameraRight = self._fixTooSmall("right", glm.cross(cameraPrincipal, worldUp))
         cameraRight = glm.normalize(cameraRight)
 
-        cameraUp = self._fixTooSmall(
-            "up", glm.cross(cameraRight, cameraPrincipal)
-        )
+        cameraUp = self._fixTooSmall("up", glm.cross(cameraRight, cameraPrincipal))
         cameraUp = glm.normalize(cameraUp)
 
         return (cameraPrincipal, cameraRight, cameraUp)
 
     def setProjectionUniform(self):
-        proj = glm.perspective(
-            glm.radians(self.fov_degrees), self.aspect, 0.1, 100.0
-        )
+        proj = glm.perspective(glm.radians(self.fov_degrees), self.aspect, 0.1, 100.0)
         if isinstance(self.shader, list):
             for shader in self.shader:
                 shader.setProjectionMatrix(proj)
         else:
             self.shader.setProjectionMatrix(proj)
 
+    def billboard(self, position, cameraPrincipal, cameraRight, cameraUp):
+        transform = glm.mat4()
+        transform[0] = glm.vec4(cameraRight, 0)
+        transform[1] = glm.vec4(cameraUp, 0)
+        transform[2] = glm.vec4(cameraPrincipal, 0)
+        # Uncomment this line to translate the position as well
+        # (without it, it's just a rotation)
+        transform[3] = glm.vec4(position, 0)
+        return transform
+
     def setViewUniform(self):
         (cameraPrincipal, cameraRight, cameraUp) = self._getCamVecs()
 
-        view = glm.lookAt(
-            self.position, self.position + cameraPrincipal, cameraUp
-        )
+        view = glm.lookAt(self.position, self.position + cameraPrincipal, cameraUp)
+
+        rot = glm.translate(view, -1.0 * self.position)
 
         if isinstance(self.shader, list):
             for shader in self.shader:
-                shader.setViewMatrix(view)
+                try:
+                    shader.setViewMatrix(view)
+                except AttributeError:
+                    shader.setViewMatrix2(view=view, rot=rot)
         else:
             self.shader.setViewMatrix(view)
 
