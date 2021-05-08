@@ -12,6 +12,8 @@ from cube import CubeMesh
 from camera import Camera
 from grid_shader import GridShader
 from grid import GridMesh
+from volume_shader import VolumeShader
+from volume_test import VolumeTestMesh
 import logging
 import glfw
 from camera_controls import CameraControls
@@ -48,9 +50,7 @@ class App:
             "./assets/OperatingTable.obj", self.obj_shader
         )
         self.operating_table_obj.uploadMeshData()
-        self.instrument_obj = ObjMesh(
-            "./assets/instrument1.obj", self.obj_shader
-        )
+        self.instrument_obj = ObjMesh("./assets/instrument1.obj", self.obj_shader)
         self.instrument_obj.uploadMeshData()
         self.instrument_pos = [0, 1.0, -0.2]
         self.instrument_rot = [0, 0, 0]
@@ -59,21 +59,24 @@ class App:
         self.instrument_obj.setRotationY(self.instrument_rot[1])
         self.instrument_obj.setRotationZ(self.instrument_rot[2])
 
+        self.volume_shader = VolumeShader()
+        self.volume_shader.compile()
+        self.volume_obj = VolumeTestMesh(self.volume_shader)
+        self.volume_obj.uploadMeshData()
+
         self.stereoCamActive = False
 
-        self.camera = Camera(1.0, [self.grid_shader, self.obj_shader])
+        self.camera = Camera(
+            1.0, [self.grid_shader, self.obj_shader, self.volume_shader]
+        )
         self.cameraControls = CameraControls(self.camera)
         self.cameraControls.installHandlers(self.window)
 
         self.stereoCamL = Camera(1.0, [self.grid_shader, self.obj_shader])
         self.stereoCamR = Camera(1.0, [self.grid_shader, self.obj_shader])
 
-        self.stereoCamL.moveTo(
-            params.CAM_X_DELTA / 2, params.CAM_Y, params.CAM_Z
-        )
-        self.stereoCamR.moveTo(
-            -params.CAM_X_DELTA / 2, params.CAM_Y, params.CAM_Z
-        )
+        self.stereoCamL.moveTo(params.CAM_X_DELTA / 2, params.CAM_Y, params.CAM_Z)
+        self.stereoCamR.moveTo(-params.CAM_X_DELTA / 2, params.CAM_Y, params.CAM_Z)
 
         stereoCamPose = params.CAM_POSE
         self.stereoCamL.lookDir(*stereoCamPose)
@@ -121,8 +124,9 @@ class App:
             gl.glClearColor(0.3, 0.4, 0.38, 1.0)
             self.obj_shader.renderMaterialOnly(-1)
             objectsToDraw = [
-                self.instrument_obj,
-                self.operating_table_obj,
+                # self.instrument_obj,
+                # self.operating_table_obj,
+                self.volume_obj,
                 self.grid,
             ]
 
