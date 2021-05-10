@@ -18,14 +18,22 @@ class VolumeTestMesh:
         self._generate_data()
 
     def _generate_data(self):
-        self.vertices = np.array(
-            [(-10, 10, 0), (10, 10, 0), (10, -10, 0), (-10, -10, 0)],
-            dtype=(np.float32, 3),
-        )
-        self.faces = np.array(
-            [(0, 1, 3), (3, 1, 2)],
-            dtype=(np.uint32, 3),
-        )
+        vs = [
+            [(-10, 10, i), (10, 10, i), (10, -10, i), (-10, -10, i)]
+            for i in np.arange(-10, 11, 0.1)
+        ]
+        self.vertices = np.array(vs, dtype=np.float32).flatten().reshape((-1, 3))
+        fs = [
+            [
+                (0 + 4 * i, 1 + 4 * i, 3 + 4 * i),
+                (3 + 4 * i, 1 + 4 * i, 2 + 4 * i),
+                (4 + 4 * i, 5 + 4 * i, 7 + 4 * i),
+                (7 + 4 * i, 5 + 4 * i, 6 + 4 * i),
+            ]
+            for i in range(210)
+        ]
+
+        self.faces = np.array(fs, dtype=(np.uint32)).flatten().reshape((-1, 3))
         print("faces", self.faces.dtype, len(self.faces), self.faces)
         print("vertices", self.vertices.dtype, len(self.vertices), self.vertices)
         self.tex3d = np.zeros((16, 16, 16), dtype=np.uint8)
@@ -35,10 +43,12 @@ class VolumeTestMesh:
                 for z in range(10):
                     if (
                         abs(
-                            np.sqrt((x - 4.5) ** 2 + (y - 4.5) ** 2 + (z - 4.5) ** 2)
+                            np.sqrt(
+                                (2 * (x - 4.5)) ** 2 + (y - 4.5) ** 2 + (z - 4.5) ** 2
+                            )
                             - 5
                         )
-                        <= 0.5
+                        <= 1
                     ):
                         self.tex3d[x, y, z] = 255
 

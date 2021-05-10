@@ -15,7 +15,7 @@ class VolumeShader(Shader):
             vec4 origin = view*vec4(0.0,0.0,0.0, 1.0);
             
             vec4 rv = rot*vec4(position, 1.0); 
-            f_pos = rv.xyz/rv.w;
+            f_pos = rv.xyz;
 
             gl_Position = projection*(origin + model*vec4(position, 1.0));
         }
@@ -29,9 +29,9 @@ class VolumeShader(Shader):
         
         void main() {
             float col = 0.0;
-            col += texture(tex, vec3((f_pos.xy+5.0)/16.0, 0.5)).x;
-            
-            gl_FragColor = vec4(col,0.0,0.0,1.0);
+            col += texture(tex, (f_pos+10.0)/32.0).x;
+
+            gl_FragColor = vec4(col,0.0,0.0,col*0.4+0.0005);
         }
         """
         super().__init__(vertexCode, fragmentCode)

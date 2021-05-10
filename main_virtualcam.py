@@ -182,7 +182,7 @@ class App:
             any_changed = changed or any_changed
 
             if any_changed:
-                self.instrument_obj.moveTo(*self.instrument_pos)
+                self.volume_obj.moveTo(*self.instrument_pos)
 
             imgui.text("Rotation")
 
@@ -190,19 +190,19 @@ class App:
                 "X Rot", self.instrument_rot[0], step=1
             )
             if changed:
-                self.instrument_obj.setRotationX(self.instrument_rot[0])
+                self.volume_obj.setRotationX(self.instrument_rot[0])
 
             changed, self.instrument_rot[1] = imgui.input_float(
                 "Y Rot", self.instrument_rot[1], step=1
             )
             if changed:
-                self.instrument_obj.setRotationY(self.instrument_rot[1])
+                self.volume_obj.setRotationY(self.instrument_rot[1])
 
             changed, self.instrument_rot[2] = imgui.input_float(
                 "Z Rot", self.instrument_rot[2], step=1
             )
             if changed:
-                self.instrument_obj.setRotationZ(self.instrument_rot[2])
+                self.volume_obj.setRotationZ(self.instrument_rot[2])
 
             m = self.instrument_obj.getRotationMat()
             v = glm.vec4(0, 0, 1, 0)

@@ -66,8 +66,7 @@ class Camera:
         (cameraPrincipal, cameraRight, cameraUp) = self._getCamVecs()
 
         view = glm.lookAt(self.position, self.position + cameraPrincipal, cameraUp)
-
-        rot = glm.translate(view, -1.0 * self.position)
+        rot = glm.inverse(glm.lookAt(glm.vec3(0, 0, 0), cameraPrincipal, cameraUp))
 
         if isinstance(self.shader, list):
             for shader in self.shader:
