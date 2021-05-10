@@ -19,14 +19,15 @@ def centroid(points):
     return tuple(c)
 
 
-def findRotMat(origVec, newVec):
+def findRotMat(origVec, newVec, normVec=None):
     origVec = glm.normalize(origVec)
     newVec = glm.normalize(newVec)
-    sinTheta = glm.length(glm.cross(origVec, newVec))
-    theta = glm.asin(sinTheta)
+    normVec = normVec or glm.normalize(glm.cross(origVec, newVec))
+    cosTheta = glm.dot(origVec, newVec)
+    theta = glm.acos(cosTheta)
 
     rotMat4 = glm.identity(glm.mat4)
-    rotMat4 = glm.rotate(rotMat4, theta, glm.vec3(1, 0, 0))
+    rotMat4 = glm.rotate(rotMat4, theta, normVec)
 
     return rotMat4
 
