@@ -23,18 +23,12 @@ class VolumeNiiMesh:
         self._load_data()
 
     def _load_data(self):
-        img = nib.load(self.filename)
-
         vs = [(-10, 10, 0), (10, 10, 0), (10, -10, 0), (-10, -10, 0)]
         self.vertices = np.array(vs, dtype=np.float32)
         fs = [(0, 1, 3), (3, 1, 2), (4, 5, 7), (7, 5, 6)]
-
         self.faces = np.array(fs, dtype=(np.uint32))
-        print("faces", self.faces.dtype, len(self.faces), self.faces)
-        print("vertices", self.vertices.dtype, len(self.vertices), self.vertices)
 
         img = nib.load(self.filename)
-
         data = img.get_fdata()
         assert len(data.shape) == 3, "Not 3D data"
 
