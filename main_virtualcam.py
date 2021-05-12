@@ -13,6 +13,7 @@ from camera import Camera
 from grid_shader import GridShader
 from grid import GridMesh
 from volume_shader import VolumeShader
+from volume_nii import VolumeNiiMesh
 from volume_test import VolumeTestMesh
 import logging
 import glfw
@@ -61,7 +62,8 @@ class App:
 
         self.volume_shader = VolumeShader()
         self.volume_shader.compile()
-        self.volume_obj = VolumeTestMesh(self.volume_shader)
+        # self.volume_obj = VolumeTestMesh(self.volume_shader)
+        self.volume_obj = VolumeNiiMesh("ct/ct.nii.gz", self.volume_shader)
         self.volume_obj.uploadMeshData()
 
         self.stereoCamActive = False

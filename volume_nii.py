@@ -4,21 +4,27 @@ import glm
 import ctypes
 from collections import namedtuple
 from pathlib import Path
+import nibabel as nib
+import math
 
 
-class VolumeTestMesh:
-    def __init__(self, shader):
+class VolumeNiiMesh:
+    def __init__(self, filename, shader):
         self.shader = shader
         self.position = glm.vec3(0, 0, 0)
         self.rotationX = 0
         self.rotationY = 0
         self.rotationZ = 0
         self.rotationMat = None
-        self.xMax = self.yMax = self.zMax = 10
+        self.filename = filename
+        self.dims = []
+        self.dims2 = []
 
-        self._generate_data()
+        self._load_data()
 
-    def _generate_data(self):
+    def _load_data(self):
+        img = nib.load(self.filename)
+
         vs = [
             [(-10, 10, i), (10, 10, i), (10, -10, i), (-10, -10, i)]
             for i in np.arange(-10, 11, 0.1)
@@ -31,27 +37,35 @@ class VolumeTestMesh:
                 (4 + 4 * i, 5 + 4 * i, 7 + 4 * i),
                 (7 + 4 * i, 5 + 4 * i, 6 + 4 * i),
             ]
-            for i in range(210)
+            for i in range(len(self.vertices) // 4)
         ]
 
         self.faces = np.array(fs, dtype=(np.uint32)).flatten().reshape((-1, 3))
         print("faces", self.faces.dtype, len(self.faces), self.faces)
         print("vertices", self.vertices.dtype, len(self.vertices), self.vertices)
-        self.tex3d = np.zeros((16, 16, 16), dtype=np.uint8)
 
-        for x in range(10):
-            for y in range(10):
-                for z in range(10):
-                    if (
-                        abs(
-                            np.sqrt(
-                                (2 * (x - 4.5)) ** 2 + (y - 4.5) ** 2 + (z - 4.5) ** 2
-                            )
-                            - 5
-                        )
-                        <= 1
-                    ):
-                        self.tex3d[x, y, z] = 255
+        img = nib.load(self.filename)
+
+        data = img.get_fdata()
+        assert len(data.shape) == 3, "Not 3D data"
+
+        def next_power_of_two(x):
+            return 2 ** (math.ceil(math.log(x, 2)))
+
+        pads = []
+        for s in data.shape:
+            next_two_power = next_power_of_two(s)
+            pad = next_two_power - s
+            pads.append((0, pad))
+
+            self.dims.append(s)
+            self.dims2.append(next_two_power)
+
+        padded = np.float32(np.pad(data, pads))
+        print("in", data.shape)
+        print("in padded", padded.shape)
+        print("dtype", padded.dtype)
+        self.tex3d = padded.flatten("F")
 
     def uploadMeshData(self):
         # create VBO, upload data
@@ -117,12 +131,12 @@ class VolumeTestMesh:
             gl.GL_TEXTURE_3D,
             0,
             gl.GL_RGBA32F,
-            16,
-            16,
-            16,
+            self.dims2[0],
+            self.dims2[1],
+            self.dims2[2],
             0,
             gl.GL_RED,
-            gl.GL_UNSIGNED_BYTE,
+            gl.GL_FLOAT,
             self.tex3d,
         )
         gl.glBindTexture(gl.GL_TEXTURE_3D, 0)
@@ -161,7 +175,7 @@ class VolumeTestMesh:
         modelMat = matT * matR
         self.shader.setModelMatrix(modelMat)
         self.shader.setTexIdx(0)
-        self.shader.setDims(self.xMax, self.yMax, self.zMax, 16, 16, 16)
+        self.shader.setDims(*self.dims, *self.dims2)
 
         gl.glBindVertexArray(self.vao)
         gl.glActiveTexture(gl.GL_TEXTURE0)
