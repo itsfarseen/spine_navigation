@@ -1,4 +1,4 @@
-from params import CAM_FOV_DEGREES
+import params
 import glm
 import OpenGL.GL as gl
 from utils import findRotMat
@@ -11,7 +11,7 @@ class Camera:
 
         self.position = glm.vec3(0.0, 5.0, 5.0)
         self.lookAtPos = glm.vec3(0.0, 0.0, 0.0)
-        self.fov_degrees = CAM_FOV_DEGREES
+        self.fov_degrees = params.CAM_FOV_DEGREES
 
         self._vecCache = {}
 
@@ -45,7 +45,10 @@ class Camera:
         return (cameraPrincipal, cameraRight, cameraUp)
 
     def setProjectionUniform(self):
-        proj = glm.perspective(glm.radians(self.fov_degrees), self.aspect, 0.1, 100.0)
+        proj = glm.perspective(glm.radians(self.fov_degrees), self.aspect, 0.1, 1000.0)
+        # proj = glm.ortho(
+        #     0, params.CAM_SENSOR_WIDTH, 0, params.CAM_SENSOR_HEIGHT, 0.01, 1000.0
+        # )
         if isinstance(self.shader, list):
             for shader in self.shader:
                 shader.setProjectionMatrix(proj)
@@ -67,13 +70,14 @@ class Camera:
 
         view = glm.lookAt(self.position, self.position + cameraPrincipal, cameraUp)
         rot = glm.inverse(glm.lookAt(glm.vec3(0, 0, 0), cameraPrincipal, cameraUp))
+        persp = glm.perspective(glm.radians(self.fov_degrees), 1, 0.1, 100.0)
 
         if isinstance(self.shader, list):
             for shader in self.shader:
                 try:
                     shader.setViewMatrix(view)
                 except AttributeError:
-                    shader.setViewMatrix2(view=view, rot=rot)
+                    shader.setViewMatrix2(view=view, rot=rot, persp=persp)
         else:
             self.shader.setViewMatrix(view)
 

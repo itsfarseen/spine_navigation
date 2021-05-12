@@ -126,8 +126,8 @@ class App:
             gl.glClearColor(0.3, 0.4, 0.38, 1.0)
             self.obj_shader.renderMaterialOnly(-1)
             objectsToDraw = [
-                # self.instrument_obj,
-                # self.operating_table_obj,
+                self.operating_table_obj,
+                self.instrument_obj,
                 self.volume_obj,
                 self.grid,
             ]
