@@ -5,9 +5,7 @@ import ctypes
 from collections import namedtuple
 from pathlib import Path
 
-Material = namedtuple(
-    "Material", ["Ns", "Ka", "Kd", "Ks", "Ke", "Ni", "d", "illum"]
-)
+Material = namedtuple("Material", ["Ns", "Ka", "Kd", "Ks", "Ke", "Ni", "d", "illum"])
 
 
 class ObjMesh:
@@ -78,9 +76,7 @@ class ObjMesh:
             for i, line in enumerate(file.readlines()):
                 if line.startswith("mtllib "):
                     mtlfilename = line.split()[1]
-                    self._load_mtl(
-                        objfilename=filename, mtlfilename=mtlfilename
-                    )
+                    self._load_mtl(objfilename=filename, mtlfilename=mtlfilename)
                 elif line.startswith("usemtl "):
                     curMtl = self.materialsIdx[line.split()[1]]
                 elif line.startswith("o "):
@@ -249,15 +245,9 @@ class ObjMesh:
     def getRotationMat(self):
         if self.rotationMat is None:
             mat = glm.identity(glm.mat4)
-            mat = glm.rotate(
-                mat, glm.radians(self.rotationX), glm.vec3(1, 0, 0)
-            )
-            mat = glm.rotate(
-                mat, glm.radians(self.rotationY), glm.vec3(0, 1, 0)
-            )
-            mat = glm.rotate(
-                mat, glm.radians(self.rotationZ), glm.vec3(0, 0, 1)
-            )
+            mat = glm.rotate(mat, glm.radians(self.rotationX), glm.vec3(1, 0, 0))
+            mat = glm.rotate(mat, glm.radians(self.rotationY), glm.vec3(0, 1, 0))
+            mat = glm.rotate(mat, glm.radians(self.rotationZ), glm.vec3(0, 0, 1))
             return mat
         else:
             return self.rotationMat
