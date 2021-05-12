@@ -47,27 +47,24 @@ class VolumeShader(Shader):
 
         void main() {
             float col = 0.0;
+            float alpha = 0.0;
 
+            for(float zz = -10.0; zz <= 10.0; zz += 0.1) {
+                vec3 f_pos1 = vec3(f_pos.xy, zz);
+                vec4 rv = rot*vec4(f_pos1, 1.0); 
 
-            if(f_pos.z <= 0.05 && f_pos.z >= -0.05) {
-                float cx, cy = 0.0;
-                for(float zz = -10.0; zz <= 10.0; zz += 0.1) {
-                    vec3 f_pos1 = vec3(f_pos.xy, zz);
-                    vec4 rv = rot*vec4(f_pos1, 1.0); 
-
-                    float x = g(rv.x, xMax, xMax2);
-                    float y = g(rv.y, yMax, yMax2);
-                    float z = g(rv.z, zMax, zMax2);
-                    vec3 texCoord = vec3(x,y,z);
-                    
-                    float hu = texture(tex, texCoord).x/1000;
-                    col = max(col, hu);
-                    cx = x; cy=y;
-                }
-                gl_FragColor = vec4(col,col,col,1.0);
-            } else {
-                gl_FragColor = vec4(col,col,col,0.0);
+                float x = g(rv.x, xMax, xMax2);
+                float y = g(rv.y, yMax, yMax2);
+                float z = g(rv.z, zMax, zMax2);
+                vec3 texCoord = vec3(x,y,z);
+                
+                float hu = texture(tex, texCoord).x/1000;
+                col = max(col, hu);
             }
+            if(col > 0.01) {
+                alpha = 0.9;
+            }
+            gl_FragColor = vec4(col,col,col,alpha);
         }
         """
         super().__init__(vertexCode, fragmentCode)

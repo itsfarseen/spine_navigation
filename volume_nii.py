@@ -25,22 +25,11 @@ class VolumeNiiMesh:
     def _load_data(self):
         img = nib.load(self.filename)
 
-        vs = [
-            [(-10, 10, i), (10, 10, i), (10, -10, i), (-10, -10, i)]
-            for i in np.arange(-10, 11, 0.1)
-        ]
-        self.vertices = np.array(vs, dtype=np.float32).flatten().reshape((-1, 3))
-        fs = [
-            [
-                (0 + 4 * i, 1 + 4 * i, 3 + 4 * i),
-                (3 + 4 * i, 1 + 4 * i, 2 + 4 * i),
-                (4 + 4 * i, 5 + 4 * i, 7 + 4 * i),
-                (7 + 4 * i, 5 + 4 * i, 6 + 4 * i),
-            ]
-            for i in range(len(self.vertices) // 4)
-        ]
+        vs = [(-10, 10, 0), (10, 10, 0), (10, -10, 0), (-10, -10, 0)]
+        self.vertices = np.array(vs, dtype=np.float32)
+        fs = [(0, 1, 3), (3, 1, 2), (4, 5, 7), (7, 5, 6)]
 
-        self.faces = np.array(fs, dtype=(np.uint32)).flatten().reshape((-1, 3))
+        self.faces = np.array(fs, dtype=(np.uint32))
         print("faces", self.faces.dtype, len(self.faces), self.faces)
         print("vertices", self.vertices.dtype, len(self.vertices), self.vertices)
 
