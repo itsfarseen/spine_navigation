@@ -12,10 +12,10 @@ class VolumeShader(Shader):
         out vec3 f_pos;
 
         void main() {
-            vec4 origin = view*vec4(0.0,0.0,0.0, 1.0);
+            vec4 origin = view*model*vec4(0.0,0.0,0.0, 1.0);
             
             f_pos = position;            
-            gl_Position = projection*(origin + model*vec4(position, 1.0));
+            gl_Position = projection*(origin + vec4(position, 1.0));
         }
         """
 
