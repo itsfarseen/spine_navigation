@@ -19,7 +19,7 @@ class VolumeTestMesh:
         self._generate_data()
 
     def _generate_data(self):
-        vs = [(-10, 10, 0), (10, 10, 0), (10, -10, 0), (-10, -10, 0)]
+        vs = [(-2, 2, 0), (2, 2, 0), (2, -2, 0), (-2, -2, 0)]
         self.vertices = np.array(vs, dtype=np.float32)
         fs = [(0, 1, 3), (3, 1, 2), (4, 5, 7), (7, 5, 6)]
         self.faces = np.array(fs, dtype=(np.uint32))

@@ -39,9 +39,8 @@ class VolumeShader(Shader):
             return a*x + b;
         }
 
-        // convert from -10,10 -> 0,512 -> 0,1
         float g(float x, float xMax, float xMax2) {
-            float a = f(x, -10, 10, 0, xMax);
+            float a = f(x, -1, 1, 0, xMax);
             return f(a, 0, xMax2, 0, 1);
         }
 
@@ -49,7 +48,7 @@ class VolumeShader(Shader):
             float col = 0.0;
             float alpha = 0.0;
 
-            for(float zz = -10.0; zz <= 10.0; zz += 0.1) {
+            for(float zz = -1.0; zz <= 1.0; zz += 0.01) {
                 vec3 f_pos1 = vec3(f_pos.xy, zz);
                 vec4 rv = rot*vec4(f_pos1, 1.0); 
 
