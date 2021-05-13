@@ -13,9 +13,7 @@ def sphere(size_x, size_y, size_z, sphere_radius):
 
     # calculate "distance" of indices to center index
     distance = (
-        (ind_0 - center[0]) ** 2
-        + (ind_1 - center[1]) ** 2
-        + (ind_2 - center[2]) ** 2
+        (ind_0 - center[0]) ** 2 + (ind_1 - center[1]) ** 2 + (ind_2 - center[2]) ** 2
     ) ** 0.5
 
     # create output
