@@ -2,6 +2,7 @@ import glfw
 import imgui
 from imgui.integrations.glfw import GlfwRenderer
 import params
+import time
 
 
 class Window:
@@ -153,7 +154,13 @@ class Window:
                 break
 
     def run(self):
+        f = open("fps.log", "w")
+        last = time.time()
         while not glfw.window_should_close(self.window):
+            now = time.time()
+            delta = now - last
+            last = now
+            print(1 / delta, file=f)
             glfw.poll_events()
             self.imgui_impl.process_inputs()
             imgui.new_frame()
