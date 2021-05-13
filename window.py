@@ -1,13 +1,14 @@
 import glfw
 import imgui
 from imgui.integrations.glfw import GlfwRenderer
+import params
 
 
 class Window:
     EVENT_CONSUMED = "CONSUMED"
 
-    WIN_WIDTH = 480
-    WIN_HEIGHT = 480
+    WIN_WIDTH = params.CAM_SENSOR_WIDTH
+    WIN_HEIGHT = params.CAM_SENSOR_HEIGHT
     WIN_ASPECT = WIN_WIDTH / WIN_HEIGHT
 
     def __init__(self, title, displayfn):
