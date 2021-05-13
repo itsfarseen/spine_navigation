@@ -84,7 +84,5 @@ class Shader:
         gl.glUniformMatrix4fv(loc, 1, False, glm.value_ptr(val))  # type: ignore
 
     def use(self):
-        assert (
-            self.compiled
-        ), "Please call compile() to compile the shader before use."
+        assert self.compiled, "Please call compile() to compile the shader before use."
         gl.glUseProgram(self.program)
