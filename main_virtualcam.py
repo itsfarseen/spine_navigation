@@ -129,8 +129,8 @@ class App:
             objectsToDraw = [
                 self.operating_table_obj,
                 self.instrument_obj,
-                self.volume_obj,
                 self.grid,
+                self.volume_obj,
             ]
 
         gl.glClear(gl.GL_COLOR_BUFFER_BIT)
