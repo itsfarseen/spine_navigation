@@ -51,6 +51,7 @@ class Window:
         glfw.set_key_callback(window, self.keyboard)
         glfw.set_scroll_callback(window, self.scroll)
         glfw.make_context_current(window)
+        glfw.swap_interval(1)
 
         self.window = window
 
