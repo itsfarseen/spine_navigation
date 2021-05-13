@@ -8,6 +8,7 @@ class Shader:
         self.program = None
         self.vertexCode = vertexCode
         self.fragmentCode = fragmentCode
+        self.loc_cache = {}
 
     def compile(self):
         program = gl.glCreateProgram()
@@ -42,10 +43,10 @@ class Shader:
         self.compiled = True
 
     def _getAttribLocation(self, attrib):
-        return gl.glGetAttribLocation(self.program, attrib)
+        if attrib in self.loc_cache:
 
     def _getUniformLocation(self, uniform):
-        return gl.glGetUniformLocation(self.program, uniform)
+        loc = gl.glGetUniformLocation(self.program, uniform)
 
     def _setFloat(self, name, val):
         self.use()
