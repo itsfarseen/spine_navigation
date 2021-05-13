@@ -63,13 +63,9 @@ class Window:
 
     def _adjustSize(self):
         if self.mode == "WIDE":
-            glfw.set_window_size(
-                self.window, self.WIN_WIDTH * 2, self.WIN_HEIGHT
-            )
+            glfw.set_window_size(self.window, self.WIN_WIDTH * 2, self.WIN_HEIGHT)
         elif self.mode == "QUAD":
-            glfw.set_window_size(
-                self.window, self.WIN_WIDTH * 2, self.WIN_HEIGHT * 2
-            )
+            glfw.set_window_size(self.window, self.WIN_WIDTH * 2, self.WIN_HEIGHT * 2)
         else:
             glfw.set_window_size(self.window, self.WIN_WIDTH, self.WIN_HEIGHT)
 
@@ -114,10 +110,7 @@ class Window:
             self.mouse_pressed = False
 
         for mousefn in self.mousefns:
-            if (
-                mousefn(btn, action, mods, False, None, None)
-                == Window.EVENT_CONSUMED
-            ):
+            if mousefn(btn, action, mods, False, None, None) == Window.EVENT_CONSUMED:
                 break
 
     def scroll(self, window, x, y):
