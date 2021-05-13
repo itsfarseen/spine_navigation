@@ -67,16 +67,16 @@ class App:
         self.volume_obj.uploadMeshData()
         self.volume_obj.moveTo(0, 1.1, 0)
 
+        all_shaders = [self.grid_shader, self.obj_shader, self.volume_shader]
+
         self.stereoCamActive = False
 
-        self.camera = Camera(
-            1.0, [self.grid_shader, self.obj_shader, self.volume_shader]
-        )
+        self.camera = Camera(1.0, all_shaders)
         self.cameraControls = CameraControls(self.camera)
         self.cameraControls.installHandlers(self.window)
 
-        self.stereoCamL = Camera(1.0, [self.grid_shader, self.obj_shader])
-        self.stereoCamR = Camera(1.0, [self.grid_shader, self.obj_shader])
+        self.stereoCamL = Camera(1.0, all_shaders)
+        self.stereoCamR = Camera(1.0, all_shaders)
 
         self.stereoCamL.moveTo(params.CAM_X_DELTA / 2, params.CAM_Y, params.CAM_Z)
         self.stereoCamR.moveTo(-params.CAM_X_DELTA / 2, params.CAM_Y, params.CAM_Z)
