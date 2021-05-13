@@ -156,11 +156,12 @@ class Window:
     def run(self):
         f = open("fps.log", "w")
         last = time.time()
+        start = time.time()
         while not glfw.window_should_close(self.window):
             now = time.time()
             delta = now - last
             last = now
-            print(1 / delta, file=f)
+            print(f"{last - start}, {1 / delta}, {delta}", file=f)
             glfw.poll_events()
             self.imgui_impl.process_inputs()
             imgui.new_frame()
