@@ -163,7 +163,7 @@ class ObjMesh:
         gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vbo)
         vbo_data = self.vertices
         gl.glBufferData(
-            gl.GL_ARRAY_BUFFER, vbo_data.nbytes, vbo_data, gl.GL_DYNAMIC_DRAW
+            gl.GL_ARRAY_BUFFER, vbo_data.nbytes, vbo_data, gl.GL_STATIC_DRAW
         )
 
         # create EBO, upload data
@@ -174,7 +174,7 @@ class ObjMesh:
             gl.GL_ELEMENT_ARRAY_BUFFER,
             ebo_data.nbytes,
             ebo_data,
-            gl.GL_DYNAMIC_DRAW,
+            gl.GL_STATIC_DRAW,
         )
 
         # create VAO

@@ -21,7 +21,7 @@ class GridMesh:
         gl.glBindBuffer(gl.GL_ARRAY_BUFFER, vbo)
         vbo_data = np.array(self.vertices, dtype=(np.float32, 3))
         gl.glBufferData(
-            gl.GL_ARRAY_BUFFER, vbo_data.nbytes, vbo_data, gl.GL_DYNAMIC_DRAW
+            gl.GL_ARRAY_BUFFER, vbo_data.nbytes, vbo_data, gl.GL_STATIC_DRAW
         )
 
         # create EBO, upload data
@@ -32,7 +32,7 @@ class GridMesh:
             gl.GL_ELEMENT_ARRAY_BUFFER,
             ebo_data.nbytes,
             ebo_data,
-            gl.GL_DYNAMIC_DRAW,
+            gl.GL_STATIC_DRAW,
         )
 
         # create VAO
