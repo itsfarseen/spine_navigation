@@ -93,8 +93,8 @@ class App:
         gl.glEnable(gl.GL_FRAMEBUFFER_SRGB)
 
         fb_zoom = 2
-        self.fb_width = 480 * 2 * fb_zoom
-        self.fb_height = 480 * fb_zoom
+        self.fb_width = params.CAM_SENSOR_WIDTH * 2 * fb_zoom
+        self.fb_height = params.CAM_SENSOR_HEIGHT * fb_zoom
 
         self.rb = gl.glGenRenderbuffers(1)  # type: ignore
         gl.glBindRenderbuffer(gl.GL_RENDERBUFFER, self.rb)
