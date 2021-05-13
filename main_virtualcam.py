@@ -92,7 +92,7 @@ class App:
         gl.glEnable(gl.GL_DEPTH_TEST)
         gl.glEnable(gl.GL_FRAMEBUFFER_SRGB)
 
-        fb_zoom = 2
+        fb_zoom = params.FB_ZOOM
         self.fb_width = params.CAM_SENSOR_WIDTH * 2 * fb_zoom
         self.fb_height = params.CAM_SENSOR_HEIGHT * fb_zoom
 
