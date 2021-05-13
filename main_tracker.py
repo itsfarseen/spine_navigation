@@ -1,3 +1,5 @@
+from volume_nii import VolumeNiiMesh
+from volume_shader import VolumeShader
 from utils import findRotMat
 from obj_shader import ObjShader
 from obj import ObjMesh
@@ -58,24 +60,35 @@ class App:
             "./assets/OperatingTable.obj", self.obj_shader
         )
         self.operating_table_obj.uploadMeshData()
-        self.instrument_obj = ObjMesh(
-            "./assets/instrument1.obj", self.obj_shader
-        )
+        self.instrument_obj = ObjMesh("./assets/instrument1.obj", self.obj_shader)
         self.instrument_obj.uploadMeshData()
         self.instrument_pos = [0, 1.0, 0.0]
         self.instrument_obj.moveTo(*self.instrument_pos)
         self.instrument_rot = [0, 0, 0]
         self.instrument_live = False
 
-        self.cameraX = Camera(1.0, [self.obj_shader, self.grid_shader])
+        self.volume_shader = VolumeShader()
+        self.volume_shader.compile()
+        # self.volume_obj = VolumeTestMesh(self.volume_shader)
+        self.volume_obj = VolumeNiiMesh("ct/ct.nii.gz", self.volume_shader)
+        self.volume_obj.uploadMeshData()
+        self.volume_obj.moveTo(0, 1.1, 0)
+
+        self.cameraX = Camera(
+            1.0, [self.obj_shader, self.grid_shader, self.volume_shader]
+        )
         self.cameraX.lookDir(1, -0.2, 0)
         self.cameraX.moveTo(-2, 2.0, 0)
 
-        self.cameraY = Camera(1.0, [self.obj_shader, self.grid_shader])
+        self.cameraY = Camera(
+            1.0, [self.obj_shader, self.grid_shader, self.volume_shader]
+        )
         self.cameraY.lookDir(0, -0.9, 0.1)
         self.cameraY.moveTo(0, 3, 0)
 
-        self.cameraZ = Camera(1.0, [self.obj_shader, self.grid_shader])
+        self.cameraZ = Camera(
+            1.0, [self.obj_shader, self.grid_shader, self.volume_shader]
+        )
         self.cameraZ.lookDir(0, -0.3, 1)
         self.cameraZ.moveTo(0, 2.0, -2)
 
@@ -107,6 +120,7 @@ class App:
         objectsToDraw = [
             self.instrument_obj,
             self.operating_table_obj,
+            self.volume_obj,
             self.grid,
         ]
 
