@@ -44,9 +44,17 @@ class Shader:
 
     def _getAttribLocation(self, attrib):
         if attrib in self.loc_cache:
+            return self.loc_cache[attrib]
+        loc = gl.glGetAttribLocation(self.program, attrib)
+        self.loc_cache[attrib] = loc
+        return loc
 
     def _getUniformLocation(self, uniform):
+        if uniform in self.loc_cache:
+            return self.loc_cache[uniform]
         loc = gl.glGetUniformLocation(self.program, uniform)
+        self.loc_cache[uniform] = loc
+        return loc
 
     def _setFloat(self, name, val):
         self.use()
