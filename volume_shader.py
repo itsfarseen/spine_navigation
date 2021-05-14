@@ -23,7 +23,7 @@ class VolumeShader(Shader):
 
         fragmentCode = """#version 330 core
 
-        uniform mat4 rot, persp, projection, model, view;        
+        uniform mat4 rot, projection, model, view;        
         uniform sampler3D tex;
         uniform float xMax, yMax, zMax;
         uniform float xMax2, yMax2, zMax2;
@@ -56,7 +56,7 @@ class VolumeShader(Shader):
             gl_FragDepth = (1 + ff.z/ff.w)/2;
 
             for(float zz = -1.0; zz <= 1.0; zz += 0.1) {
-                vec4 rv = persp*rot*vec4(f_pos.xy, zz, 1.0); 
+                vec4 rv = projection*rot*vec4(f_pos.xy, zz, 1.0); 
                 //rv.x *= rv.w;
                 //rv.y *= rv.w;
                 float pf = f(zz, 0, 1, 1.0, 0.9);
@@ -68,7 +68,8 @@ class VolumeShader(Shader):
                 
                 float hu = texture(tex, texCoord).x/1000;
 
-                if(col < 0.01 && hu > 0.01) {
+                float lim = 0.01;
+                if(col < lim && hu > lim) {
                     alpha = 0.9;
                     vec4 ff = projection*view*model*rot*(origin + vec4(f_pos.xy, zz, 1.0));
                     gl_FragDepth = (1 + ff.z/ff.w)/2;
@@ -89,10 +90,9 @@ class VolumeShader(Shader):
     def setModelMatrix(self, mat4):
         self._setMat4("model", mat4)
 
-    def setViewMatrix2(self, view, rot, persp):
+    def setViewMatrix2(self, view, rot):
         self._setMat4("view", view)
         self._setMat4("rot", rot)
-        self._setMat4("persp", persp)
 
     def setProjectionMatrix(self, mat4):
         self._setMat4("projection", mat4)

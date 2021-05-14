@@ -70,14 +70,13 @@ class Camera:
 
         view = glm.lookAt(self.position, self.position + cameraPrincipal, cameraUp)
         rot = glm.inverse(glm.lookAt(glm.vec3(0, 0, 0), cameraPrincipal, cameraUp))
-        persp = glm.perspective(glm.radians(self.fov_degrees), 1, 0.1, 100.0)
 
         if isinstance(self.shader, list):
             for shader in self.shader:
                 try:
                     shader.setViewMatrix(view)
                 except AttributeError:
-                    shader.setViewMatrix2(view=view, rot=rot, persp=persp)
+                    shader.setViewMatrix2(view=view, rot=rot)
         else:
             self.shader.setViewMatrix(view)
 
