@@ -18,28 +18,16 @@ class Camera:
     def setup(self):
         self.setAllUniforms()
 
-    def _fixTooSmall(self, name, val):
-        # todo: this workaround is not working
-        # because we are not letting the vector advance, we are just clamping it
-        if glm.length(val) < 0.1:
-            if name in self._vecCache:
-                return self._vecCache[name]
-            else:
-                return val
-        else:
-            self._vecCache[name] = val
-            return val
-
     def _getCamVecs(self):
         worldUp = glm.vec3(0.0, 1.0, 0.0)
 
-        cameraPrincipal = self._fixTooSmall("principal", self.lookAtPos - self.position)
+        cameraPrincipal = self.lookAtPos - self.position
         cameraPrincipal = glm.normalize(cameraPrincipal)
 
-        cameraRight = self._fixTooSmall("right", glm.cross(cameraPrincipal, worldUp))
+        cameraRight = glm.cross(cameraPrincipal, worldUp)
         cameraRight = glm.normalize(cameraRight)
 
-        cameraUp = self._fixTooSmall("up", glm.cross(cameraRight, cameraPrincipal))
+        cameraUp = glm.cross(cameraRight, cameraPrincipal)
         cameraUp = glm.normalize(cameraUp)
 
         return (cameraPrincipal, cameraRight, cameraUp)
