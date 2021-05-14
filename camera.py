@@ -140,5 +140,4 @@ class Camera:
 
         self.position += delta
 
-        print(self.position, self.lookAtPos, glm.length(self._principal()))
         self.setViewUniform()
