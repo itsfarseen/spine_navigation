@@ -1,3 +1,5 @@
+from frame import FrameMesh
+from frame_shader import FrameShader
 from volume_nii import VolumeNiiMesh
 from volume_shader import VolumeShader
 from utils import findRotMat
@@ -53,6 +55,11 @@ class App:
         self.grid_shader.compile()
         self.grid = GridMesh(self.grid_shader)
         self.grid.uploadMeshData()
+
+        self.frame_shader = FrameShader()
+        self.frame_shader.compile()
+        self.frame = FrameMesh(self.frame_shader)
+        self.frame.uploadMeshData()
 
         self.obj_shader = ObjShader()
         self.obj_shader.compile()
@@ -135,8 +142,7 @@ class App:
             self.grid,
         ]
 
-        gl.glClear(gl.GL_COLOR_BUFFER_BIT)
-        gl.glClear(gl.GL_DEPTH_BUFFER_BIT)
+        gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
 
         gl.glViewport(
             0,
@@ -182,6 +188,16 @@ class App:
             #     gl.GL_UNSIGNED_BYTE,
             #     img,
             # )
+
+        gl.glViewport(
+            0,
+            0,
+            params.CAM_SENSOR_WIDTH * 2,
+            params.CAM_SENSOR_HEIGHT * 2,
+        )
+        gl.glDepthFunc(gl.GL_ALWAYS)
+        self.frame.draw()
+        gl.glDepthFunc(gl.GL_LESS)
 
         self.drawImGui()
 
