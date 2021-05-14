@@ -72,7 +72,7 @@ class App:
         self.stereoCamActive = False
 
         self.camera = Camera(1.0, all_shaders, "orthographic")
-        self.cameraControls = CameraControls(self.camera)
+        self.cameraControls = CameraControls([(-1, -1, 1, 1, self.camera)])
         self.cameraControls.installHandlers(self.window)
 
         self.stereoCamL = Camera(1.0, all_shaders)

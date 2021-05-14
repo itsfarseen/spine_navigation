@@ -92,6 +92,15 @@ class App:
         self.cameraZ.lookDir(0, -0.3, 1)
         self.cameraZ.moveTo(0, 2.0, -2)
 
+        self.camera_controls = CameraControls(
+            [
+                (-1, 0, 1, 1, self.cameraX),
+                (-1, -1, 0, 0, self.cameraY),
+                (0, -1, 1, 0, self.cameraZ),
+            ]
+        )
+        self.camera_controls.installHandlers(self.window)
+
         gl.glEnable(gl.GL_BLEND)
         gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)
         gl.glEnable(gl.GL_DEPTH_TEST)
