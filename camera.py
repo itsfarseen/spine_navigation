@@ -11,27 +11,21 @@ class Camera:
 
         self.position = glm.vec3(0.0, 5.0, 5.0)
         self.lookAtPos = glm.vec3(0.0, 0.0, 0.0)
+
+        worldUp = glm.vec3(0.0, 1.0, 0.0)
+
+        self.right = glm.cross(self._principal(), worldUp)
+        self.up = glm.cross(self.right, self._principal())
+
         self.fov_degrees = params.CAM_FOV_DEGREES
 
-        self._vecCache = {}
         self.projection = projection
+
+    def _principal(self):
+        return glm.normalize(self.lookAtPos - self.position)
 
     def setup(self):
         self.setAllUniforms()
-
-    def _getCamVecs(self):
-        worldUp = glm.vec3(0.0, 1.0, 0.0)
-
-        cameraPrincipal = self.lookAtPos - self.position
-        cameraPrincipal = glm.normalize(cameraPrincipal)
-
-        cameraRight = glm.cross(cameraPrincipal, worldUp)
-        cameraRight = glm.normalize(cameraRight)
-
-        cameraUp = glm.cross(cameraRight, cameraPrincipal)
-        cameraUp = glm.normalize(cameraUp)
-
-        return (cameraPrincipal, cameraRight, cameraUp)
 
     def setProjectionUniform(self):
         if self.projection == "perspective":
@@ -58,10 +52,9 @@ class Camera:
             self.shader.setProjectionMatrix(proj)
 
     def setViewUniform(self):
-        (cameraPrincipal, cameraRight, cameraUp) = self._getCamVecs()
 
-        view = glm.lookAt(self.position, self.position + cameraPrincipal, cameraUp)
-        rot = glm.inverse(glm.lookAt(glm.vec3(0, 0, 0), cameraPrincipal, cameraUp))
+        view = glm.lookAt(self.position, self.position + self._principal(), self.up)
+        rot = glm.inverse(glm.lookAt(glm.vec3(0, 0, 0), self._principal(), self.up))
 
         if isinstance(self.shader, list):
             for shader in self.shader:
@@ -95,16 +88,17 @@ class Camera:
     def rotate(self, x, y):
         x_factor = 90.0
         y_factor = 90.0
-        (cameraPrincipal, cameraRight, cameraUp) = self._getCamVecs()
 
-        # x_rot_axis = glm.vec3(0,1,0)
-        x_rot_axis = cameraUp
+        x_rot_axis = glm.vec3(0, 1, 0)
         x_angle = glm.radians(-x * x_factor)
         rot_x = glm.rotate(glm.identity(glm.mat4), x_angle, x_rot_axis)
+        self.right = glm.vec3(rot_x * glm.vec4(self.right, 0))
+        self.up = glm.cross(self.right, self._principal())
 
-        y_rot_axis = cameraRight
+        y_rot_axis = self.right
         y_angle = glm.radians(y * y_factor)
         rot_y = glm.rotate(glm.identity(glm.mat4), y_angle, y_rot_axis)
+        self.up = glm.vec3(rot_y * glm.vec4(self.up, 0))
 
         rot = rot_x * rot_y
         posDir = glm.vec4(self.position - self.lookAtPos, 0.0)
@@ -115,22 +109,13 @@ class Camera:
 
     def move(self, x, y):
         amt = 4.0
-
-        (cameraPrincipal, cameraRight, cameraUp) = self._getCamVecs()
-
-        delta = -amt * (x * cameraRight + y * cameraUp)
-
+        delta = -amt * (x * self.right + y * self.up)
         self.position += delta
         self.lookAtPos += delta
-
         self.setViewUniform()
 
     def zoom(self, z):
         amt = 1.0
-
-        (cameraPrincipal, cameraRight, cameraUp) = self._getCamVecs()
-        delta = amt * z * cameraPrincipal
-
+        delta = amt * z * self._principal()
         self.position += delta
-
         self.setViewUniform()
