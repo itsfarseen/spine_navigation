@@ -75,19 +75,19 @@ class App:
         self.volume_obj.moveTo(0, 1.1, 0)
 
         self.cameraX = Camera(
-            1.0, [self.obj_shader, self.grid_shader, self.volume_shader]
+            1.0, [self.obj_shader, self.grid_shader, self.volume_shader], "orthographic"
         )
         self.cameraX.lookDir(1, -0.2, 0)
         self.cameraX.moveTo(-2, 2.0, 0)
 
         self.cameraY = Camera(
-            1.0, [self.obj_shader, self.grid_shader, self.volume_shader]
+            1.0, [self.obj_shader, self.grid_shader, self.volume_shader], "orthographic"
         )
         self.cameraY.lookDir(0, -0.9, 0.1)
         self.cameraY.moveTo(0, 3, 0)
 
         self.cameraZ = Camera(
-            1.0, [self.obj_shader, self.grid_shader, self.volume_shader]
+            1.0, [self.obj_shader, self.grid_shader, self.volume_shader], "orthographic"
         )
         self.cameraZ.lookDir(0, -0.3, 1)
         self.cameraZ.moveTo(0, 2.0, -2)
