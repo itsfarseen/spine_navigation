@@ -11,11 +11,7 @@ class Camera:
 
         self.position = glm.vec3(0.0, 5.0, 5.0)
         self.lookAtPos = glm.vec3(0.0, 0.0, 0.0)
-
-        worldUp = glm.vec3(0.0, 1.0, 0.0)
-
-        self.right = glm.cross(self._principal(), worldUp)
-        self.up = glm.cross(self.right, self._principal())
+        self._update_axes()
 
         self.fov_degrees = params.CAM_FOV_DEGREES
 
@@ -69,20 +65,30 @@ class Camera:
         self.setProjectionUniform()
         self.setViewUniform()
 
+    def _update_axes(self):
+        worldUp = glm.vec3(0.0, 1.0, 0.0)
+
+        self.right = glm.cross(self._principal(), worldUp)
+        self.up = glm.cross(self.right, self._principal())
+
     def moveTo(self, x, y, z):
         moveTo = glm.vec3(x, y, z)
         delta = moveTo - self.position
         self.position += delta
         self.lookAtPos += delta
+        # no need to call _update_axes() here
+        # because we are not changing camera
         self.setViewUniform()
 
     def lookAt(self, x, y, z):
         self.lookAtPos = glm.vec3(x, y, z)
+        self._update_axes()
         self.setViewUniform()
 
     def lookDir(self, x, y, z):
         lookDir = glm.vec3(x, y, z)
         self.lookAtPos = self.position + lookDir
+        self._update_axes()
         self.setViewUniform()
 
     def rotate(self, x, y):
@@ -112,6 +118,8 @@ class Camera:
         delta = -amt * (x * self.right + y * self.up)
         self.position += delta
         self.lookAtPos += delta
+        # no need to call _update_axes() here
+        # because we are not changing camera
         self.setViewUniform()
 
     def zoom(self, z):
