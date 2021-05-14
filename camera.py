@@ -5,7 +5,7 @@ from utils import findRotMat
 
 
 class Camera:
-    def __init__(self, aspect, shader):
+    def __init__(self, aspect, shader, projection="perspective"):
         self.shader = shader
         self.aspect = float(aspect)
 
@@ -14,6 +14,7 @@ class Camera:
         self.fov_degrees = params.CAM_FOV_DEGREES
 
         self._vecCache = {}
+        self.projection = projection
 
     def setup(self):
         self.setAllUniforms()
@@ -33,10 +34,23 @@ class Camera:
         return (cameraPrincipal, cameraRight, cameraUp)
 
     def setProjectionUniform(self):
-        proj = glm.perspective(glm.radians(self.fov_degrees), self.aspect, 0.1, 1000.0)
-        # proj = glm.ortho(
-        #     0, params.CAM_SENSOR_WIDTH, 0, params.CAM_SENSOR_HEIGHT, 0.01, 1000.0
-        # )
+        if self.projection == "perspective":
+            proj = glm.perspective(
+                glm.radians(self.fov_degrees), self.aspect, 0.1, 1000.0
+            )
+        elif self.projection == "orthographic":
+            zoom_scale = glm.length(self.lookAtPos - self.position) / 2
+            proj = glm.ortho(
+                -zoom_scale,
+                zoom_scale,
+                -zoom_scale,
+                zoom_scale,
+                -1000.0,
+                1000.0,
+            )
+
+        else:
+            raise ValueError("Invalid projection", self.projection)
         if isinstance(self.shader, list):
             for shader in self.shader:
                 shader.setProjectionMatrix(proj)
