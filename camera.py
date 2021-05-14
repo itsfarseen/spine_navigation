@@ -1,3 +1,4 @@
+import math
 import params
 import glm
 import OpenGL.GL as gl
@@ -123,7 +124,21 @@ class Camera:
         self.setViewUniform()
 
     def zoom(self, z):
-        amt = 1.0
+        amt = 0.25
         delta = amt * z * self._principal()
+
+        # don't overshoot and oscillate
+        p = glm.length(self.position - self.lookAtPos)
+        if p < z * amt:
+            return
+
+        # don't make self.position and self.lookAtPos too close
+        p = glm.length(self.position + delta - self.lookAtPos)
+        if math.isnan(p) or p <= 0.001:
+            return
+        print(p)
+
         self.position += delta
+
+        print(self.position, self.lookAtPos, glm.length(self._principal()))
         self.setViewUniform()
