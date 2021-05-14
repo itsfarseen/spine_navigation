@@ -55,7 +55,7 @@ class VolumeShader(Shader):
             vec4 ff = projection*view*model*rot*(origin + vec4(f_pos, 1.0));
             gl_FragDepth = (1 + ff.z/ff.w)/2;
 
-            for(float zz = -1.0; zz <= 1.0; zz += 0.01) {
+            for(float zz = -1.0; zz <= 1.0; zz += 0.1) {
                 vec4 rv = persp*rot*vec4(f_pos.xy, zz, 1.0); 
                 //rv.x *= rv.w;
                 //rv.y *= rv.w;
