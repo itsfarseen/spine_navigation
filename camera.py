@@ -55,16 +55,6 @@ class Camera:
         else:
             self.shader.setProjectionMatrix(proj)
 
-    def billboard(self, position, cameraPrincipal, cameraRight, cameraUp):
-        transform = glm.mat4()
-        transform[0] = glm.vec4(cameraRight, 0)
-        transform[1] = glm.vec4(cameraUp, 0)
-        transform[2] = glm.vec4(cameraPrincipal, 0)
-        # Uncomment this line to translate the position as well
-        # (without it, it's just a rotation)
-        transform[3] = glm.vec4(position, 0)
-        return transform
-
     def setViewUniform(self):
         (cameraPrincipal, cameraRight, cameraUp) = self._getCamVecs()
 
