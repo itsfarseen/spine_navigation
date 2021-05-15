@@ -65,7 +65,8 @@ class App:
         # self.volume_obj = VolumeTestMesh(self.volume_shader)
         self.volume_obj = VolumeNiiMesh("ct/ct.nii.gz", self.volume_shader)
         self.volume_obj.uploadMeshData()
-        self.volume_obj.moveTo(0, 1.1, 0)
+        self.volume_obj.moveTo(0, 1.1, -1)
+        self.volume_obj.zoom(0.8, 0.8, 1.5)
 
         all_shaders = [self.grid_shader, self.obj_shader, self.volume_shader]
 

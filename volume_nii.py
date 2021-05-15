@@ -152,11 +152,20 @@ class VolumeNiiMesh:
         mat = glm.translate(mat, self.position)
         return mat
 
+    def getScaleMatrix(self):
+        mat = glm.identity(glm.mat4)
+        mat = glm.scale(mat, self.scale)
+        return mat
+
+    def zoom(self, x, y, z):
+        self.scale = glm.vec3(x, y, z)
+
     def draw(self):
         self.shader.use()
         matT = self.getTranslationMat()
         matR = self.getRotationMat()
-        modelMat = matT * matR
+        matZ = self.getScaleMatrix()
+        modelMat = matT * matR * matZ
         self.shader.setModelMatrix(modelMat)
         self.shader.setTexIdx(0)
         self.shader.setDims(*self.dims, *self.dims2)

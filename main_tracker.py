@@ -79,27 +79,28 @@ class App:
         # self.volume_obj = VolumeTestMesh(self.volume_shader)
         self.volume_obj = VolumeNiiMesh("ct/ct.nii.gz", self.volume_shader)
         self.volume_obj.uploadMeshData()
-        self.volume_obj.moveTo(0, 1.1, 0)
+        self.volume_obj.moveTo(0, 1.1, -1)
+        self.volume_obj.zoom(0.8, 0.8, 1.5)
 
         self.cameraX = Camera(
             1.0, [self.obj_shader, self.grid_shader, self.volume_shader], "orthographic"
         )
         self.cameraX.lookDir(1, 0, 0)
-        self.cameraX.moveTo(-1, 1.0, 0)
-        self.cameraX.zoom(-1.5)
+        self.cameraX.moveTo(-1, 1.25, -1)
+        self.cameraX.zoom(-3)
 
         self.cameraY = Camera(
             1.0, [self.obj_shader, self.grid_shader, self.volume_shader], "orthographic"
         )
         self.cameraY.lookDir(0, -0.99, 0.01)
-        self.cameraY.moveTo(0, 1, 0)
-        self.cameraY.zoom(-1)
+        self.cameraY.moveTo(0, 1.25, -1)
+        self.cameraY.zoom(-3)
 
         self.cameraZ = Camera(
             1.0, [self.obj_shader, self.grid_shader, self.volume_shader], "orthographic"
         )
         self.cameraZ.lookDir(0, 0, -1)
-        self.cameraZ.moveTo(0, 1.0, 2)
+        self.cameraZ.moveTo(0, 1.25, 2)
 
         self.camera_controls = CameraControls(
             [
