@@ -52,17 +52,16 @@ class VolumeShader(Shader):
             float col = 0;
             float alpha = 0;
             vec4 origin = vec4(0.0,0.0,0.0, 1.0);
-            vec4 ff = projection*view*model*rot*(origin + vec4(f_pos, 1.0));
+            vec4 ff = view*model*rot*(origin + vec4(f_pos, 1.0));
             gl_FragDepth = (1 + ff.z/ff.w)/2;
 
             for(float zz = -1.0; zz <= 1.0; zz += 0.1) {
-                vec4 rv = projection*rot*vec4(f_pos.xy, zz, 1.0); 
+                vec4 rv = rot*vec4(f_pos.xy, zz, 1.0); 
                 //rv.x *= rv.w;
                 //rv.y *= rv.w;
-                float pf = f(zz, 0, 1, 1.0, 0.9);
 
-                float x = pf_adjust(g(rv.x, xMax, xMax2), pf);
-                float y = pf_adjust(g(rv.y, yMax, yMax2), pf);
+                float x = g(rv.x, xMax, xMax2);
+                float y = g(rv.y, yMax, yMax2);
                 float z = g(rv.z, zMax, zMax2);
                 vec3 texCoord = vec3(x,y,z);
                 
@@ -71,7 +70,7 @@ class VolumeShader(Shader):
                 float lim = 0.01;
                 if(col < lim && hu > lim) {
                     alpha = 0.9;
-                    vec4 ff = projection*view*model*rot*(origin + vec4(f_pos.xy, zz, 1.0));
+                    vec4 ff = view*model*rot*(origin + vec4(f_pos.xy, zz, 1.0));
                     gl_FragDepth = (1 + ff.z/ff.w)/2;
                 }
                 col = max(col, hu);
