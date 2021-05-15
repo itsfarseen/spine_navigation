@@ -69,7 +69,7 @@ class VolumeShader(Shader):
 
                 float lim = 0.01;
                 if(col < lim && hu > lim) {
-                    alpha = 0.9;
+                    alpha = 0.5;
                     vec4 ff = view*model*rot*(origin + vec4(f_pos.xy, zz, 1.0));
                     gl_FragDepth = (1 + ff.z/ff.w)/2;
                 }
