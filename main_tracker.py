@@ -207,17 +207,11 @@ class App:
             imgui.text("Position")
 
             any_changed = False
-            changed, self.instrument_pos[0] = imgui.input_float(
-                "X", self.instrument_pos[0], step=0.1
-            )
+            imgui.input_float("X", -self.instrument_pos[0], step=0.1)
 
-            changed, self.instrument_pos[1] = imgui.input_float(
-                "Y", self.instrument_pos[1], step=0.1
-            )
+            imgui.input_float("Y", self.instrument_pos[1], step=0.1)
 
-            changed, self.instrument_pos[2] = imgui.input_float(
-                "Z", self.instrument_pos[2], step=0.1
-            )
+            imgui.input_float("Z", self.instrument_pos[2], step=0.1)
 
             m = self.instrument_obj.getRotationMat()
             v = glm.vec4(0, 0, 1, 0)
